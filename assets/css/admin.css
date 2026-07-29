@@ -1,0 +1,152 @@
+.tbtmg-generator-grid,
+.tbtmg-details-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0 18px;
+}
+
+.tbtmg-field {
+	margin: 0 0 16px;
+}
+
+.tbtmg-field--wide {
+	grid-column: 1 / -1;
+}
+
+.tbtmg-field label,
+.tbtmg-field label span {
+	display: block;
+	margin-bottom: 6px;
+}
+
+.tbtmg-field input,
+.tbtmg-field select,
+.tbtmg-field textarea {
+	width: 100%;
+}
+
+.tbtmg-generator-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+}
+
+.tbtmg-generator-actions .spinner {
+	float: none;
+	margin: 0;
+}
+
+.tbtmg-api-status {
+	display: inline-flex;
+	align-items: center;
+	min-height: 30px;
+	padding: 0 10px;
+	border-radius: 999px;
+	font-weight: 600;
+}
+
+.tbtmg-api-status.is-ready {
+	background: #edfaef;
+	color: #166534;
+}
+
+.tbtmg-api-status.is-missing {
+	background: #fff3cd;
+	color: #684f00;
+}
+
+.tbtmg-generator-message,
+.tbtmg-pair-validation {
+	margin-top: 12px;
+	font-weight: 600;
+}
+
+.tbtmg-generator-message.is-error,
+.tbtmg-pair-validation.is-error {
+	color: #b32d2e;
+}
+
+.tbtmg-generator-message.is-success,
+.tbtmg-pair-validation.is-success {
+	color: #166534;
+}
+
+.tbtmg-pairs {
+	display: grid;
+	gap: 12px;
+	margin-top: 16px;
+}
+
+.tbtmg-pair-row {
+	display: grid;
+	grid-template-columns: 42px minmax(0, 1fr) minmax(0, 1fr) 104px;
+	gap: 12px;
+	align-items: start;
+	padding: 14px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #fff;
+}
+
+.tbtmg-pair-number {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	background: #edf4ff;
+	color: #063f94;
+	font-weight: 700;
+}
+
+.tbtmg-pair-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+}
+
+.tbtmg-pair-actions .button-link-delete {
+	padding: 5px 0;
+}
+
+.tbtmg-copy-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 6px;
+}
+
+.tbtmg-copy-row input {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 12px;
+}
+
+body.post-type-tbt_match_game #poststuff #post-body.columns-2 {
+	margin-right: 320px;
+}
+
+@media (max-width: 960px) {
+	.tbtmg-generator-grid,
+	.tbtmg-details-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.tbtmg-field--wide {
+		grid-column: auto;
+	}
+
+	.tbtmg-pair-row {
+		grid-template-columns: 36px minmax(0, 1fr);
+	}
+
+	.tbtmg-pair-row .tbtmg-field,
+	.tbtmg-pair-actions {
+		grid-column: 2;
+	}
+
+	body.post-type-tbt_match_game #poststuff #post-body.columns-2 {
+		margin-right: 0;
+	}
+}
