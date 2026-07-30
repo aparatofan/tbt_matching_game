@@ -7,6 +7,8 @@
 			this.config = config;
 			this.leftList = container.querySelector('[data-tbtmg-list="left"]');
 			this.rightList = container.querySelector('[data-tbtmg-list="right"]');
+			this.board = container.querySelector('.tbtmg-board');
+			this.connectionLayer = container.querySelector('[data-tbtmg-connections]');
 			this.matchedCount = container.querySelector('[data-tbtmg-matched]');
 			this.attemptCount = container.querySelector('[data-tbtmg-attempts]');
 			this.completion = container.querySelector('[data-tbtmg-completion]');
@@ -18,12 +20,16 @@
 			this.selectedCard = null;
 			this.dragState = null;
 			this.suppressClick = false;
+			this.connectionFrame = null;
+			this.resizeObserver = null;
+			this.animatedConnectionIds = new Set();
 			this.reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 			if (this.resetButton) {
 				this.resetButton.addEventListener('click', () => this.reset());
 			}
 
+			this.setupConnections();
 			this.reset();
 		}
 
@@ -36,9 +42,115 @@
 			return copy;
 		}
 
+		setupConnections() {
+			if (!this.board || !this.connectionLayer) {
+				return;
+			}
+
+			window.addEventListener('resize', () => this.scheduleConnectionDraw(), { passive: true });
+
+			if (window.ResizeObserver) {
+				this.resizeObserver = new ResizeObserver(() => this.scheduleConnectionDraw());
+				this.resizeObserver.observe(this.board);
+			}
+
+			if (document.fonts && document.fonts.ready) {
+				document.fonts.ready.then(() => this.scheduleConnectionDraw());
+			}
+		}
+
+		clearConnections() {
+			if (this.connectionFrame) {
+				window.cancelAnimationFrame(this.connectionFrame);
+				this.connectionFrame = null;
+			}
+			if (this.connectionLayer) {
+				this.connectionLayer.replaceChildren();
+			}
+		}
+
+		scheduleConnectionDraw() {
+			if (!this.connectionLayer || this.connectionFrame) {
+				return;
+			}
+			this.connectionFrame = window.requestAnimationFrame(() => {
+				this.connectionFrame = null;
+				this.drawConnections();
+			});
+		}
+
+		findCard(list, pairId) {
+			return Array.from(list.children).find((card) => card.dataset.pairId === pairId) || null;
+		}
+
+		getConnectionVariation(pairId) {
+			const hash = Array.from(pairId).reduce((total, character) => {
+				return ((total * 31) + character.charCodeAt(0)) % 997;
+			}, 0);
+			return ((hash % 7) - 3) * 4;
+		}
+
+		drawConnections() {
+			if (!this.board || !this.connectionLayer) {
+				return;
+			}
+
+			const stackedLayout = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+			if (stackedLayout || this.matchedIds.size === 0) {
+				this.connectionLayer.replaceChildren();
+				return;
+			}
+
+			const boardRect = this.board.getBoundingClientRect();
+			if (!boardRect.width || !boardRect.height) {
+				return;
+			}
+
+			this.connectionLayer.setAttribute('viewBox', `0 0 ${boardRect.width} ${boardRect.height}`);
+			const paths = document.createDocumentFragment();
+
+			this.matchedIds.forEach((pairId) => {
+				const leftCard = this.findCard(this.leftList, pairId);
+				const rightCard = this.findCard(this.rightList, pairId);
+				if (!leftCard || !rightCard) {
+					return;
+				}
+
+				const leftRect = leftCard.getBoundingClientRect();
+				const rightRect = rightCard.getBoundingClientRect();
+				const startX = leftRect.right - boardRect.left;
+				const startY = leftRect.top + (leftRect.height / 2) - boardRect.top;
+				const endX = rightRect.left - boardRect.left;
+				const endY = rightRect.top + (rightRect.height / 2) - boardRect.top;
+				const gap = Math.max(1, endX - startX);
+				const curve = Math.max(28, Math.min(88, gap * 0.52));
+				const variation = this.getConnectionVariation(pairId);
+				const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+				path.classList.add('tbtmg-connection');
+				path.dataset.pairId = pairId;
+				path.setAttribute('pathLength', '1');
+				path.setAttribute(
+					'd',
+					`M ${startX} ${startY} C ${startX + curve} ${startY + variation}, ${endX - curve} ${endY - variation}, ${endX} ${endY}`
+				);
+
+				if (!this.animatedConnectionIds.has(pairId)) {
+					path.classList.add('is-drawing');
+					this.animatedConnectionIds.add(pairId);
+				}
+
+				paths.append(path);
+			});
+
+			this.connectionLayer.replaceChildren(paths);
+		}
+
 		reset() {
 			this.cleanupDrag();
 			this.clearSelection();
+			this.clearConnections();
+			this.animatedConnectionIds.clear();
 			this.leftList.replaceChildren();
 			this.rightList.replaceChildren();
 			this.matchedIds = new Set();
@@ -51,6 +163,7 @@
 
 			leftPairs.forEach((pair) => this.leftList.append(this.createCard(pair, 'left')));
 			rightPairs.forEach((pair) => this.rightList.append(this.createCard(pair, 'right')));
+			this.scheduleConnectionDraw();
 			this.updateStatus();
 		}
 
@@ -153,8 +266,12 @@
 				card.classList.add('is-matched', 'is-match-pop');
 				card.setAttribute('aria-pressed', 'true');
 				card.disabled = true;
-				window.setTimeout(() => card.classList.remove('is-match-pop'), 450);
+				window.setTimeout(() => {
+					card.classList.remove('is-match-pop');
+					this.scheduleConnectionDraw();
+				}, 450);
 			});
+			this.scheduleConnectionDraw();
 			this.announce(this.config.labels.correct);
 		}
 
