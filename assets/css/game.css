@@ -135,13 +135,44 @@
 }
 
 .tbtmg-board {
+	position: relative;
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	align-items: start;
-	gap: 18px;
+	gap: clamp(72px, 8vw, 108px);
+	isolation: isolate;
+}
+
+.tbtmg-connections {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	display: block;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+	pointer-events: none;
+}
+
+.tbtmg-connection {
+	fill: none;
+	stroke: var(--tbtmg-blue);
+	stroke-width: 4;
+	stroke-linecap: round;
+	opacity: 0.9;
+	filter: drop-shadow(0 2px 2px rgba(8, 86, 201, 0.22));
+	vector-effect: non-scaling-stroke;
+}
+
+.tbtmg-connection.is-drawing {
+	stroke-dasharray: 1;
+	stroke-dashoffset: 1;
+	animation: tbtmg-draw-connection 0.55s ease-out forwards;
 }
 
 .tbtmg-column {
+	position: relative;
+	z-index: 1;
 	min-width: 0;
 	padding: 14px;
 	border: 1px solid var(--tbtmg-line);
@@ -355,6 +386,10 @@
 	100% { transform: scale(1); }
 }
 
+@keyframes tbtmg-draw-connection {
+	to { stroke-dashoffset: 0; }
+}
+
 @keyframes tbtmg-fade-in {
 	from { opacity: 0; transform: translateY(8px); }
 	to { opacity: 1; transform: translateY(0); }
@@ -385,6 +420,11 @@
 
 	.tbtmg-board {
 		grid-template-columns: 1fr;
+		gap: 18px;
+	}
+
+	.tbtmg-connections {
+		display: none;
 	}
 
 	.tbtmg-card {

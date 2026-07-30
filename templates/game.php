@@ -60,6 +60,13 @@ if ( ! empty( $args['compact'] ) ) {
 	<p class="tbtmg-sr-only" aria-live="polite" data-tbtmg-live></p>
 
 	<section class="tbtmg-board" aria-describedby="<?php echo esc_attr( $instance_id ); ?>-instructions">
+		<svg
+			class="tbtmg-connections"
+			data-tbtmg-connections
+			aria-hidden="true"
+			focusable="false"
+			preserveAspectRatio="none"
+		></svg>
 		<div class="tbtmg-column">
 			<div class="tbtmg-column-heading">
 				<h3><?php echo esc_html( $data['left_column_title'] ); ?></h3>
