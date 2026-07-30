@@ -24,15 +24,24 @@ if ( ! empty( $args['compact'] ) ) {
 >
 	<?php if ( ! empty( $args['show_title'] ) || ! empty( $args['show_instructions'] ) ) : ?>
 		<header class="tbtmg-hero">
-			<?php if ( ! empty( $data['eyebrow'] ) ) : ?>
-				<p class="tbtmg-eyebrow"><?php echo esc_html( $data['eyebrow'] ); ?></p>
-			<?php endif; ?>
-			<?php if ( ! empty( $args['show_title'] ) ) : ?>
-				<h2 class="tbtmg-title"><?php echo esc_html( $data['title'] ); ?></h2>
-			<?php endif; ?>
-			<?php if ( ! empty( $args['show_instructions'] ) ) : ?>
-				<p class="tbtmg-subtitle" id="<?php echo esc_attr( $instance_id ); ?>-instructions"><?php echo esc_html( $data['instructions'] ); ?></p>
-			<?php endif; ?>
+			<div class="tbtmg-hero__content">
+				<?php if ( ! empty( $data['eyebrow'] ) ) : ?>
+					<p class="tbtmg-eyebrow"><?php echo esc_html( $data['eyebrow'] ); ?></p>
+				<?php endif; ?>
+				<?php if ( ! empty( $args['show_title'] ) ) : ?>
+					<h2 class="tbtmg-title"><?php echo esc_html( $data['title'] ); ?></h2>
+				<?php endif; ?>
+				<?php if ( ! empty( $args['show_instructions'] ) ) : ?>
+					<p class="tbtmg-subtitle" id="<?php echo esc_attr( $instance_id ); ?>-instructions"><?php echo esc_html( $data['instructions'] ); ?></p>
+				<?php endif; ?>
+			</div>
+			<img
+				class="tbtmg-hero__logo"
+				src="https://thebluetree.pl/wp-content/uploads/2020/12/TBT-white-logo.png"
+				alt="<?php esc_attr_e( 'The Blue Tree', 'tbt-matching-games' ); ?>"
+				loading="lazy"
+				decoding="async"
+			>
 		</header>
 	<?php endif; ?>
 
