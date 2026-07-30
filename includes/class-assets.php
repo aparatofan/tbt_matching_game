@@ -35,7 +35,13 @@ final class Assets {
 		}
 
 		$this->registered = true;
-		wp_register_style( 'tbtmg-game', TBTMG_URL . 'assets/css/game.css', array(), TBTMG_VERSION );
+		wp_register_style(
+			'tbtmg-fonts',
+			'https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&family=Roboto+Slab:wght@400;500;600;700;800&display=swap',
+			array(),
+			null
+		);
+		wp_register_style( 'tbtmg-game', TBTMG_URL . 'assets/css/game.css', array( 'tbtmg-fonts' ), TBTMG_VERSION );
 		wp_register_script( 'tbtmg-game', TBTMG_URL . 'assets/js/game.js', array(), TBTMG_VERSION, true );
 	}
 
