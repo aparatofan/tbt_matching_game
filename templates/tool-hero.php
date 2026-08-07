@@ -18,11 +18,22 @@ if ( empty( $hero ) || ! is_array( $hero ) ) {
 }
 ?>
 <header class="tbt-tool-hero">
-	<?php if ( '' !== (string) $hero['eyebrow'] ) : ?>
-		<p class="tbt-tool-hero__eyebrow"><?php echo esc_html( $hero['eyebrow'] ); ?></p>
-	<?php endif; ?>
-	<h1 class="tbt-tool-hero__title"><?php echo esc_html( $hero['title'] ); ?></h1>
-	<?php if ( '' !== (string) $hero['support'] ) : ?>
-		<p class="tbt-tool-hero__support"><?php echo esc_html( $hero['support'] ); ?></p>
+	<div class="tbt-tool-hero__content">
+		<?php if ( '' !== (string) $hero['eyebrow'] ) : ?>
+			<p class="tbt-tool-hero__eyebrow"><?php echo esc_html( $hero['eyebrow'] ); ?></p>
+		<?php endif; ?>
+		<h1 class="tbt-tool-hero__title"><?php echo esc_html( $hero['title'] ); ?></h1>
+		<?php if ( '' !== (string) $hero['support'] ) : ?>
+			<p class="tbt-tool-hero__support"><?php echo esc_html( $hero['support'] ); ?></p>
+		<?php endif; ?>
+	</div>
+	<?php if ( '' !== (string) $hero['logo'] ) : ?>
+		<img
+			class="tbt-tool-hero__logo"
+			src="<?php echo esc_url( $hero['logo'] ); ?>"
+			alt="<?php esc_attr_e( 'The Blue Tree', 'tbt-matching-games' ); ?>"
+			loading="lazy"
+			decoding="async"
+		>
 	<?php endif; ?>
 </header>

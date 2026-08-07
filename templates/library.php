@@ -22,6 +22,11 @@ $tbtmg_uid = 'tbtmg-lib-' . wp_unique_id();
 
 	<?php require TBTMG_DIR . 'templates/tool-hero.php'; ?>
 
+	<div class="tbtmg-section-head">
+		<h2 class="tbtmg-section-title"><?php esc_html_e( 'Your games', 'tbt-matching-games' ); ?></h2>
+		<span class="tbtmg-section-rule" aria-hidden="true"></span>
+	</div>
+
 	<div class="tbtmg-library__head">
 		<div class="tbtmg-field tbtmg-field--search">
 			<label for="<?php echo esc_attr( $tbtmg_uid ); ?>-search"><?php esc_html_e( 'Search your games', 'tbt-matching-games' ); ?></label>

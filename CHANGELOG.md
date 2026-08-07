@@ -9,9 +9,14 @@
 - Replaced the near-duplicate local colours with the canonical Style Book
   tokens, declared in a cascade layer so a site-wide token file or a one-line
   snippet overrides them while the plugin stays canonical on its own.
-- Added the canonical Tool Hero to the generator and the library, with copy
-  settable through the new `tbt_matching_games_hero` filter and a `hero="no"`
-  shortcode attribute for pages that already have one.
+- Added the canonical Tool Hero to the generator and the library, carrying the
+  white TBT mark, with copy settable through the new `tbt_matching_games_hero`
+  filter and a `hero="no"` shortcode attribute for pages that already have one.
+- The tool pages now sit on an edge-to-edge pale canvas with no inset panel.
+- Generator sections are numbered stages with the Swipe blue top rule, and the
+  game title moved into the first stage.
+- The game library follows the Swipe deck list: section head, compact rows and
+  a blue spine on the leading edge.
 - Applied the Style Book typography split: Roboto Slab for content the teacher
   authors, Roboto for interface chrome, Roboto Mono for the hero identity.
   Roboto is added to the font request the plugin already makes.

@@ -19,6 +19,11 @@ final class Tools_Shortcode {
 	public const GENERATOR_SHORTCODE = 'tbt_matching_generator';
 	public const LIBRARY_SHORTCODE   = 'tbt_matching_games';
 
+	/**
+	 * The white TBT mark used in the hero, shared with the player's hero.
+	 */
+	public const LOGO_URL = 'https://thebluetree.pl/wp-content/uploads/2020/12/TBT-white-logo.png';
+
 	private Game_Repository $repository;
 	private Assets $assets;
 
@@ -106,20 +111,22 @@ final class Tools_Shortcode {
 
 		$defaults = 'library' === $context
 			? array(
-				'eyebrow' => __( 'THE BLUE TREE', 'tbt-matching-games' ),
+				'eyebrow' => __( 'The Blue Tree Teacher Tools', 'tbt-matching-games' ),
 				'title'   => __( 'MY MATCHING GAMES', 'tbt-matching-games' ),
 				'support' => __( 'Everything you have created', 'tbt-matching-games' ),
+				'logo'    => self::LOGO_URL,
 			)
 			: array(
-				'eyebrow' => __( 'THE BLUE TREE', 'tbt-matching-games' ),
+				'eyebrow' => __( 'The Blue Tree Teacher Tools', 'tbt-matching-games' ),
 				'title'   => __( 'MATCHING GAME', 'tbt-matching-games' ),
 				'support' => __( 'Create a matching game for your class', 'tbt-matching-games' ),
+				'logo'    => self::LOGO_URL,
 			);
 
 		/**
 		 * Filter the Tool Hero copy.
 		 *
-		 * @param array  $hero    Eyebrow, title and support line.
+		 * @param array  $hero    Eyebrow, title, support line and logo URL.
 		 * @param string $context Either 'generator' or 'library'.
 		 */
 		$hero = apply_filters( 'tbt_matching_games_hero', $defaults, $context );
@@ -129,6 +136,7 @@ final class Tools_Shortcode {
 			'eyebrow' => (string) $hero['eyebrow'],
 			'title'   => (string) $hero['title'],
 			'support' => (string) $hero['support'],
+			'logo'    => (string) $hero['logo'],
 		);
 	}
 
