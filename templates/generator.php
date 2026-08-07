@@ -14,6 +14,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $tbtmg_uid = 'tbtmg-gen-' . wp_unique_id();
+
+/*
+ * Stages are numbered as they are rendered, so a teacher without generation
+ * rights sees Stage 1, 2 rather than a gap where the AI stage would have been.
+ * The game title belongs to whichever stage comes first, for the same reason.
+ */
+$tbtmg_stage = 0;
 ?>
 <div class="tbt tbt-tool tbtmg-tool tbtmg-generator" data-tbtmg-tool="generator" data-tbtmg-game-id="<?php echo esc_attr( (string) $game_id ); ?>">
 
@@ -25,27 +32,39 @@ $tbtmg_uid = 'tbtmg-gen-' . wp_unique_id();
 
 	<div class="tbtmg-notice" data-tbtmg-notice role="status" aria-live="polite" hidden></div>
 
-	<div class="tbtmg-field">
-		<label for="<?php echo esc_attr( $tbtmg_uid ); ?>-title"><?php esc_html_e( 'Game title', 'tbt-matching-games' ); ?></label>
-		<input
-			type="text"
-			id="<?php echo esc_attr( $tbtmg_uid ); ?>-title"
-			data-tbtmg-field="title"
-			maxlength="200"
-			placeholder="<?php esc_attr_e( 'Example: Reporting verbs — B2', 'tbt-matching-games' ); ?>"
-			value="<?php echo esc_attr( $game_id ? $data['title'] : '' ); ?>"
-		>
-	</div>
-
 	<?php if ( ! empty( $can_generate ) ) : ?>
+	<?php $tbtmg_stage++; ?>
 	<section class="tbtmg-panel is-open" data-tbtmg-panel>
-		<h3 class="tbtmg-panel__heading">
+		<h2 class="tbtmg-panel__heading">
 			<button type="button" class="tbtmg-panel__toggle" aria-expanded="true" aria-controls="<?php echo esc_attr( $tbtmg_uid ); ?>-generator">
-				<span><?php esc_html_e( 'Generate with AI', 'tbt-matching-games' ); ?></span>
+				<span class="tbtmg-panel__stage">
+					<?php
+					printf(
+						/* translators: %d: stage number. */
+						esc_html__( 'Stage %d:', 'tbt-matching-games' ),
+						(int) $tbtmg_stage
+					);
+					?>
+				</span>
+				<span class="tbtmg-panel__name"><?php esc_html_e( 'Create the game', 'tbt-matching-games' ); ?></span>
 				<span class="tbtmg-panel__chevron" aria-hidden="true"></span>
 			</button>
-		</h3>
+		</h2>
 		<div class="tbtmg-panel__body" id="<?php echo esc_attr( $tbtmg_uid ); ?>-generator">
+			<p class="tbtmg-hint"><?php esc_html_e( 'Name the game, then describe what it should test.', 'tbt-matching-games' ); ?></p>
+
+			<div class="tbtmg-field">
+				<label for="<?php echo esc_attr( $tbtmg_uid ); ?>-title"><?php esc_html_e( 'Game title', 'tbt-matching-games' ); ?></label>
+				<input
+					type="text"
+					id="<?php echo esc_attr( $tbtmg_uid ); ?>-title"
+					data-tbtmg-field="title"
+					maxlength="200"
+					placeholder="<?php esc_attr_e( 'Example: Reporting verbs — B2', 'tbt-matching-games' ); ?>"
+					value="<?php echo esc_attr( $game_id ? $data['title'] : '' ); ?>"
+				>
+			</div>
+
 			<div class="tbtmg-field">
 				<label for="<?php echo esc_attr( $tbtmg_uid ); ?>-topic"><?php esc_html_e( 'Topic', 'tbt-matching-games' ); ?></label>
 				<textarea id="<?php echo esc_attr( $tbtmg_uid ); ?>-topic" data-tbtmg-generator="topic" rows="2" maxlength="500" placeholder="<?php esc_attr_e( 'Example: Reporting verbs, B2/C1', 'tbt-matching-games' ); ?>"><?php echo esc_textarea( $data['topic'] ); ?></textarea>
@@ -73,14 +92,37 @@ $tbtmg_uid = 'tbtmg-gen-' . wp_unique_id();
 	</section>
 	<?php endif; ?>
 
+	<?php $tbtmg_stage++; ?>
 	<section class="tbtmg-panel" data-tbtmg-panel>
-		<h3 class="tbtmg-panel__heading">
+		<h2 class="tbtmg-panel__heading">
 			<button type="button" class="tbtmg-panel__toggle" aria-expanded="false" aria-controls="<?php echo esc_attr( $tbtmg_uid ); ?>-wording">
-				<span><?php esc_html_e( 'Wording', 'tbt-matching-games' ); ?></span>
+				<span class="tbtmg-panel__stage">
+					<?php
+					printf(
+						/* translators: %d: stage number. */
+						esc_html__( 'Stage %d:', 'tbt-matching-games' ),
+						(int) $tbtmg_stage
+					);
+					?>
+				</span>
+				<span class="tbtmg-panel__name"><?php esc_html_e( 'Wording', 'tbt-matching-games' ); ?></span>
 				<span class="tbtmg-panel__chevron" aria-hidden="true"></span>
 			</button>
-		</h3>
+		</h2>
 		<div class="tbtmg-panel__body" id="<?php echo esc_attr( $tbtmg_uid ); ?>-wording" hidden>
+			<?php if ( empty( $can_generate ) ) : ?>
+				<div class="tbtmg-field">
+					<label for="<?php echo esc_attr( $tbtmg_uid ); ?>-title"><?php esc_html_e( 'Game title', 'tbt-matching-games' ); ?></label>
+					<input
+						type="text"
+						id="<?php echo esc_attr( $tbtmg_uid ); ?>-title"
+						data-tbtmg-field="title"
+						maxlength="200"
+						placeholder="<?php esc_attr_e( 'Example: Reporting verbs — B2', 'tbt-matching-games' ); ?>"
+						value="<?php echo esc_attr( $game_id ? $data['title'] : '' ); ?>"
+					>
+				</div>
+			<?php endif; ?>
 			<?php
 			$tbtmg_fields = array(
 				'topic'              => array( __( 'Topic', 'tbt-matching-games' ), 'textarea', 500 ),
@@ -108,14 +150,24 @@ $tbtmg_uid = 'tbtmg-gen-' . wp_unique_id();
 		</div>
 	</section>
 
+	<?php $tbtmg_stage++; ?>
 	<section class="tbtmg-panel" data-tbtmg-panel>
-		<h3 class="tbtmg-panel__heading">
+		<h2 class="tbtmg-panel__heading">
 			<button type="button" class="tbtmg-panel__toggle" aria-expanded="false" aria-controls="<?php echo esc_attr( $tbtmg_uid ); ?>-pairs">
-				<span><?php esc_html_e( 'Pairs', 'tbt-matching-games' ); ?></span>
+				<span class="tbtmg-panel__stage">
+					<?php
+					printf(
+						/* translators: %d: stage number. */
+						esc_html__( 'Stage %d:', 'tbt-matching-games' ),
+						(int) $tbtmg_stage
+					);
+					?>
+				</span>
+				<span class="tbtmg-panel__name"><?php esc_html_e( 'Pairs', 'tbt-matching-games' ); ?></span>
 				<span class="tbtmg-panel__count" data-tbtmg-pair-count></span>
 				<span class="tbtmg-panel__chevron" aria-hidden="true"></span>
 			</button>
-		</h3>
+		</h2>
 		<div class="tbtmg-panel__body" id="<?php echo esc_attr( $tbtmg_uid ); ?>-pairs" hidden>
 			<p class="tbtmg-hint"><?php esc_html_e( 'Every item needs one unambiguous partner. You can edit all generated text before saving.', 'tbt-matching-games' ); ?></p>
 			<div class="tbtmg-pair-validation" data-tbtmg-pair-validation role="status" aria-live="polite"></div>

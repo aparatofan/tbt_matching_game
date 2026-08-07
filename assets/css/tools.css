@@ -40,12 +40,22 @@
 	}
 }
 
-.tbt-tool {
-	max-width: 900px;
-	margin: 0 auto;
-	padding: 32px;
-	border-radius: var(--tbt-radius-panel);
+/*
+ * tools.css only loads on a page that actually renders a tool shortcode, so
+ * painting the page itself is safe here and gives the tool an edge-to-edge pale
+ * canvas without a 100vw full-bleed trick, which would add a horizontal
+ * scrollbar wherever the browser draws a classic vertical one.
+ */
+body {
 	background: var(--tbt-canvas);
+}
+
+.tbt-tool {
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	padding: 32px 24px 48px;
+	background: transparent;
 	color: var(--tbt-ink);
 	font-family: var(--tbt-font-ui);
 	font-size: 16px;
@@ -87,12 +97,31 @@
 /* ---------- Tool Hero (Style Book §6B) ---------- */
 
 .tbt-tool-hero {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 32px;
+	align-items: center;
 	margin-bottom: 48px;
 	padding: 32px;
 	border-radius: var(--tbt-radius-panel);
 	background: linear-gradient(135deg, var(--tbt-blue), var(--tbt-blue-dark));
 	box-shadow: var(--tbt-shadow-raised);
 	color: #FFFFFF;
+}
+
+.tbt-tool-hero__content {
+	min-width: 0;
+}
+
+.tbt-tool .tbt-tool-hero__logo {
+	display: block;
+	width: clamp(120px, 16vw, 180px);
+	height: auto;
+	max-height: 96px;
+	margin: 0 !important;
+	border: 0;
+	object-fit: contain;
+	box-shadow: none;
 }
 
 /*
@@ -125,14 +154,15 @@
 	text-transform: uppercase;
 }
 
+/* The tagline is set in content type, matching the Swipe hero. */
 .tbt-tool .tbt-tool-hero__support {
 	max-width: 640px;
 	margin: 12px 0 0 !important;
 	padding: 0 !important;
 	color: inherit !important;
-	font-family: var(--tbt-font-ui) !important;
+	font-family: var(--tbt-font-content) !important;
 	font-size: 16px !important;
-	font-weight: 400 !important;
+	font-weight: 600 !important;
 	line-height: 1.55 !important;
 	opacity: .94;
 }
@@ -396,6 +426,8 @@
 .tbtmg-panel {
 	margin-bottom: 40px;
 	border: 1px solid var(--tbt-border);
+	/* The blue top rule is the established TBT Swipe stage-card signature. */
+	border-top: 5px solid var(--tbt-blue);
 	border-radius: var(--tbt-radius-panel);
 	background: var(--tbt-surface);
 	box-shadow: var(--tbt-shadow);
@@ -408,7 +440,7 @@
 
 .tbtmg-panel__toggle {
 	display: flex;
-	gap: 12px;
+	gap: 8px;
 	align-items: center;
 	width: 100%;
 	padding: 32px 40px;
@@ -418,6 +450,17 @@
 	font-weight: 700;
 	line-height: 1.3;
 	text-align: left;
+	text-transform: uppercase;
+}
+
+.tbtmg-panel__stage {
+	color: var(--tbt-blue);
+}
+
+.tbtmg-panel__name {
+	min-width: 0;
+	/* Pushes the pair count and the chevron to the far edge of the heading. */
+	margin-right: auto;
 }
 
 .tbtmg-panel__toggle:focus-visible {
@@ -432,11 +475,12 @@
 }
 
 .tbtmg-panel__count {
-	margin-left: auto;
 	color: var(--tbt-muted);
 	font-family: var(--tbt-font-ui);
 	font-size: 14px;
 	font-weight: 400;
+	/* Metadata, not part of the uppercase stage heading. */
+	text-transform: none;
 }
 
 .tbtmg-panel__chevron {
@@ -503,30 +547,56 @@
 
 /* ---------- Library — object cards (Style Book §4) ---------- */
 
+/* Section head, mirroring the Swipe library: title plus a quiet rule. */
+.tbtmg-section-head {
+	display: flex;
+	gap: 16px;
+	align-items: center;
+	margin-bottom: 24px;
+}
+
+.tbtmg-section-title {
+	color: var(--tbt-blue);
+	font-family: var(--tbt-font-content);
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.tbtmg-section-rule {
+	flex: 1;
+	height: 2px;
+	background: var(--tbt-border);
+}
+
 .tbtmg-library__head {
 	margin-bottom: 24px;
 }
 
 .tbtmg-library__list {
 	display: grid;
-	gap: 24px;
+	gap: 12px;
 }
 
 .tbtmg-game-row {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto;
 	gap: 16px;
-	padding: 24px;
+	align-items: center;
+	padding: 16px 24px;
 	border: 1px solid var(--tbt-border);
+	/* Swipe's deck row: a blue spine on the leading edge. */
+	border-left: 6px solid var(--tbt-blue);
 	border-radius: var(--tbt-radius-card);
 	background: var(--tbt-surface);
+	box-shadow: var(--tbt-shadow);
 	transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 
 .tbtmg-game-row:hover {
 	border-color: var(--tbt-blue);
-	box-shadow: var(--tbt-shadow);
-	transform: translateY(-1px);
+	box-shadow: var(--tbt-shadow-raised);
+	transform: translateY(-2px);
 }
 
 .tbtmg-game-row__title {
