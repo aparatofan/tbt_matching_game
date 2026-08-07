@@ -5,6 +5,8 @@
  * Rows are rendered by tools.js from GET /games so search, pagination and the
  * row actions all read from one owner-scoped source of truth.
  *
+ * Available variables: $hero.
+ *
  * @package TBT_Matching_Games
  */
 
@@ -17,6 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 $tbtmg_uid = 'tbtmg-lib-' . wp_unique_id();
 ?>
 <div class="tbt tbt-tool tbtmg-tool tbtmg-library" data-tbtmg-tool="library">
+
+	<?php require TBTMG_DIR . 'templates/tool-hero.php'; ?>
 
 	<div class="tbtmg-library__head">
 		<div class="tbtmg-field tbtmg-field--search">

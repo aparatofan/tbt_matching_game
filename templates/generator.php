@@ -2,7 +2,7 @@
 /**
  * Front-end generator tool.
  *
- * Available variables: $game_id, $data, $status, $permalink, $can_generate, $denied.
+ * Available variables: $game_id, $data, $status, $permalink, $can_generate, $denied, $hero.
  *
  * @package TBT_Matching_Games
  */
@@ -16,6 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 $tbtmg_uid = 'tbtmg-gen-' . wp_unique_id();
 ?>
 <div class="tbt tbt-tool tbtmg-tool tbtmg-generator" data-tbtmg-tool="generator" data-tbtmg-game-id="<?php echo esc_attr( (string) $game_id ); ?>">
+
+	<?php require TBTMG_DIR . 'templates/tool-hero.php'; ?>
 
 	<?php if ( ! empty( $denied ) ) : ?>
 		<p class="tbtmg-notice tbtmg-notice--error"><?php esc_html_e( 'That game belongs to another teacher, so a new game was started instead.', 'tbt-matching-games' ); ?></p>
