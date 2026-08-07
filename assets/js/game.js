@@ -1,6 +1,8 @@
 (function () {
 	'use strict';
 
+	let instanceCounter = 0;
+
 	class TBTMatchingGame {
 		constructor(container, config) {
 			this.container = container;
@@ -24,6 +26,21 @@
 			this.resizeObserver = null;
 			this.animatedConnectionIds = new Set();
 			this.reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			instanceCounter += 1;
+			this.instanceId = `tbtmg-${instanceCounter}`;
+
+			window.addEventListener('blur', () => this.cancelDrag());
+			document.addEventListener('visibilitychange', () => {
+				if (document.hidden) {
+					this.cancelDrag();
+				}
+			});
+			document.addEventListener('contextmenu', () => this.cancelDrag());
+			document.addEventListener('keydown', (event) => {
+				if (event.key === 'Escape') {
+					this.cancelDrag();
+				}
+			});
 
 			if (this.resetButton) {
 				this.resetButton.addEventListener('click', () => this.reset());
@@ -148,6 +165,7 @@
 
 		reset() {
 			this.cleanupDrag();
+			this.sweepOrphans();
 			this.clearSelection();
 			this.clearConnections();
 			this.animatedConnectionIds.clear();
@@ -314,37 +332,56 @@
 		}
 
 		startPointerDrag(event) {
+			if (this.dragState) {
+				return;
+			}
+
+			this.sweepOrphans();
+
 			const card = event.currentTarget;
 			if (card.disabled || (event.pointerType === 'mouse' && event.button !== 0)) {
 				return;
 			}
 
 			const rect = card.getBoundingClientRect();
-			const ghost = document.createElement('div');
-			ghost.className = 'tbtmg-drag-ghost';
-			ghost.textContent = card.textContent;
-			document.body.append(ghost);
-
-			this.dragState = {
+			const state = {
 				pointerId: event.pointerId,
 				source: card,
-				ghost,
+				ghost: null,
 				offsetX: event.clientX - rect.left,
 				offsetY: event.clientY - rect.top,
 				startX: event.clientX,
 				startY: event.clientY,
 				didMove: false,
 				selectionCleared: false,
-				target: null
+				target: null,
+				onMove: null,
+				onUp: null,
+				onCancel: null,
+				onLostCapture: null
 			};
 
-			card.setPointerCapture(event.pointerId);
-			card.classList.add('is-drag-source');
-			this.positionGhost(event.clientX, event.clientY);
+			state.onMove = (moveEvent) => this.onPointerMove(moveEvent);
+			state.onUp = (upEvent) => this.endPointerDrag(upEvent);
+			state.onCancel = (cancelEvent) => {
+				if (this.dragState && cancelEvent.pointerId === this.dragState.pointerId) {
+					this.cancelDrag();
+				}
+			};
+			state.onLostCapture = () => this.onLostPointerCapture();
 
-			card.addEventListener('pointermove', this.boundPointerMove = (moveEvent) => this.onPointerMove(moveEvent));
-			card.addEventListener('pointerup', this.boundPointerUp = (upEvent) => this.endPointerDrag(upEvent));
-			card.addEventListener('pointercancel', this.boundPointerCancel = () => this.cleanupDrag());
+			this.dragState = state;
+
+			window.addEventListener('pointermove', state.onMove);
+			window.addEventListener('pointerup', state.onUp);
+			window.addEventListener('pointercancel', state.onCancel);
+			card.addEventListener('lostpointercapture', state.onLostCapture);
+
+			try {
+				card.setPointerCapture(event.pointerId);
+			} catch (error) {
+				// Best effort: the window listeners keep the drag working without capture.
+			}
 		}
 
 		onPointerMove(event) {
@@ -353,20 +390,40 @@
 			}
 
 			const distance = Math.hypot(event.clientX - this.dragState.startX, event.clientY - this.dragState.startY);
-			if (distance > 5) {
+			if (distance > 5 && !this.dragState.didMove) {
 				this.dragState.didMove = true;
-				if (!this.dragState.selectionCleared) {
-					this.clearSelection();
-					this.dragState.selectionCleared = true;
-				}
+				this.beginVisualDrag();
+			}
+
+			if (!this.dragState.didMove) {
+				return;
 			}
 
 			this.positionGhost(event.clientX, event.clientY);
 			this.updateDropTarget(event.clientX, event.clientY);
 		}
 
-		positionGhost(clientX, clientY) {
+		beginVisualDrag() {
 			if (!this.dragState) {
+				return;
+			}
+
+			const ghost = document.createElement('div');
+			ghost.className = 'tbtmg-drag-ghost';
+			ghost.textContent = this.dragState.source.textContent;
+			ghost.dataset.tbtmgOwner = this.instanceId;
+			document.body.append(ghost);
+			this.dragState.ghost = ghost;
+			this.dragState.source.classList.add('is-drag-source');
+
+			if (!this.dragState.selectionCleared) {
+				this.clearSelection();
+				this.dragState.selectionCleared = true;
+			}
+		}
+
+		positionGhost(clientX, clientY) {
+			if (!this.dragState || !this.dragState.ghost) {
 				return;
 			}
 			const { ghost, offsetX, offsetY } = this.dragState;
@@ -377,7 +434,7 @@
 		}
 
 		updateDropTarget(clientX, clientY) {
-			if (!this.dragState) {
+			if (!this.dragState || !this.dragState.ghost) {
 				return;
 			}
 
@@ -419,21 +476,83 @@
 			}
 		}
 
+		cancelDrag() {
+			if (!this.dragState) {
+				return;
+			}
+
+			const { didMove } = this.dragState;
+			this.cleanupDrag();
+			if (didMove) {
+				this.suppressClick = true;
+				window.setTimeout(() => {
+					this.suppressClick = false;
+				}, 0);
+			}
+		}
+
+		onLostPointerCapture() {
+			const state = this.dragState;
+			if (!state) {
+				return;
+			}
+
+			window.setTimeout(() => {
+				if (this.dragState === state) {
+					this.cancelDrag();
+				}
+			}, 0);
+		}
+
 		cleanupDrag() {
 			if (!this.dragState) {
 				return;
 			}
 
-			const { source, ghost, target } = this.dragState;
+			const state = this.dragState;
+			const { source, ghost, target } = state;
 			source.classList.remove('is-drag-source');
 			if (target) {
 				target.classList.remove('is-drop-target');
 			}
-			source.removeEventListener('pointermove', this.boundPointerMove);
-			source.removeEventListener('pointerup', this.boundPointerUp);
-			source.removeEventListener('pointercancel', this.boundPointerCancel);
-			ghost.remove();
+			window.removeEventListener('pointermove', state.onMove);
+			window.removeEventListener('pointerup', state.onUp);
+			window.removeEventListener('pointercancel', state.onCancel);
+			source.removeEventListener('lostpointercapture', state.onLostCapture);
+
+			try {
+				source.releasePointerCapture(state.pointerId);
+			} catch (error) {
+				// Capture may already be gone; nothing to release.
+			}
+
+			if (ghost) {
+				ghost.remove();
+			}
 			this.dragState = null;
+			this.sweepOrphans();
+		}
+
+		sweepOrphans() {
+			const activeGhost = this.dragState ? this.dragState.ghost : null;
+			document.querySelectorAll('.tbtmg-drag-ghost').forEach((ghost) => {
+				if (ghost.dataset.tbtmgOwner === this.instanceId && ghost !== activeGhost) {
+					ghost.remove();
+				}
+			});
+
+			const activeSource = this.dragState ? this.dragState.source : null;
+			const activeTarget = this.dragState ? this.dragState.target : null;
+			this.container.querySelectorAll('.tbtmg-card.is-drag-source').forEach((card) => {
+				if (card !== activeSource) {
+					card.classList.remove('is-drag-source');
+				}
+			});
+			this.container.querySelectorAll('.tbtmg-card.is-drop-target').forEach((card) => {
+				if (card !== activeTarget) {
+					card.classList.remove('is-drop-target');
+				}
+			});
 		}
 	}
 
