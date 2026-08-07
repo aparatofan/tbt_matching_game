@@ -25,6 +25,7 @@ define( 'TBTMG_URL', plugin_dir_url( __FILE__ ) );
 
 $includes = array(
 	'class-activator.php',
+	'class-access.php',
 	'class-post-type.php',
 	'class-game-validator.php',
 	'class-game-repository.php',

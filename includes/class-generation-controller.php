@@ -79,8 +79,11 @@ final class Generation_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function permissions_check() {
-		$capability = (string) apply_filters( 'tbt_matching_games_generation_capability', 'manage_options' );
-		if ( ! current_user_can( $capability ) ) {
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error( 'tbtmg_not_logged_in', __( 'You must be logged in to generate matching games.', 'tbt-matching-games' ), array( 'status' => 401 ) );
+		}
+
+		if ( ! Access::can_generate() ) {
 			return new \WP_Error( 'tbtmg_forbidden', __( 'You are not allowed to generate matching games.', 'tbt-matching-games' ), array( 'status' => 403 ) );
 		}
 

@@ -19,6 +19,8 @@ final class Activator {
 	 */
 	public static function activate(): void {
 		Post_Type::register();
+		Access::add_caps();
+		update_option( 'tbtmg_caps_version', Access::CAPS_VERSION );
 		flush_rewrite_rules();
 	}
 
