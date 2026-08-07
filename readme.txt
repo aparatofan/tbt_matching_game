@@ -4,7 +4,7 @@ Tags: education, matching game, openai, shortcode, quiz
 Requires at least: 6.4
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 0.1.1
+Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,6 +13,8 @@ Create editable AI-assisted matching games, publish them at standalone URLs, and
 == Description ==
 
 TBT Matching Games adds a Matching Games post type to WordPress. Administrators can generate 4–12 matching pairs from a topic through the OpenAI API, edit all content, save drafts, publish standalone games, and embed games with a shortcode.
+
+Teachers can also build games entirely on the front end with the [tbt_matching_generator] and [tbt_matching_games] shortcodes, share them with a QR code, and never open wp-admin.
 
 The front-end interaction supports drag-and-drop in either direction, click matching, keyboard access, attempts, restart, completion feedback, mobile layouts, and multiple games on one page.
 
@@ -24,6 +26,15 @@ The front-end interaction supports drag-and-drop in either direction, click matc
 4. Open Matching Games > Add New.
 
 == Changelog ==
+
+= 0.2.0 =
+* Added the [tbt_matching_generator] and [tbt_matching_games] front-end teaching tools.
+* Added an owner-scoped REST CRUD API and the tbt_use_teaching_tools access gate.
+* Added QR code sharing, duplicate, and trash from the front-end library.
+* Replaced the generation throttle with a per-user daily counter.
+
+= 0.1.1 =
+* Fixed a drag ghost and card highlight that could stay on screen after a drag ended.
 
 = 0.1.0 =
 * Initial MVP.

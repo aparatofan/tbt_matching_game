@@ -106,6 +106,28 @@ final class Game_Repository {
 	}
 
 	/**
+	 * Save a sanitised but incomplete payload.
+	 *
+	 * Draft saves from the front-end tools take this path: the data is cleaned
+	 * exactly as a full save would clean it, but the completeness rules are not
+	 * enforced, so a teacher never loses work by saving early.
+	 *
+	 * @param int   $post_id Game post ID.
+	 * @param array $raw Raw payload.
+	 * @return array
+	 */
+	public function save_partial( int $post_id, array $raw ): array {
+		$sanitised = $this->validator->sanitise( $raw );
+		$title     = $sanitised['title'];
+		unset( $sanitised['title'] );
+
+		update_post_meta( $post_id, self::META_KEY, $sanitised );
+		$this->request_cache[ $post_id ] = array_merge( $sanitised, array( 'title' => $title ) );
+
+		return $this->request_cache[ $post_id ];
+	}
+
+	/**
 	 * Determine whether the current visitor may view a game.
 	 *
 	 * @param \WP_Post $post Game post.

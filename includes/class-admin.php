@@ -282,6 +282,13 @@ final class Admin {
 			return $data;
 		}
 
+		// REST writes carry no editor nonce, so this guard would read an empty
+		// payload and force every front-end save to draft. Games_Controller
+		// validates and sets the status itself, making the guard redundant here.
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return $data;
+		}
+
 		$post_id = absint( $postarr['ID'] ?? 0 );
 		if ( isset( $_POST['tbtmg_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['tbtmg_nonce'] ) ), 'tbtmg_save_game' ) ) {
 			$payload = $this->payload_from_request_values( $post_id, (string) ( $data['post_title'] ?? '' ) );

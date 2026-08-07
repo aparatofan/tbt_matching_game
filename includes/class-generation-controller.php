@@ -12,6 +12,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class Generation_Controller {
+	/**
+	 * The default number of generations one user gets per window.
+	 */
+	public const DEFAULT_LIMIT = 20;
+
+	/**
+	 * Site-wide limit option, matching the TBT Swipe naming.
+	 */
+	public const LIMIT_OPTION = 'tbtmg_max_generations_per_day';
+
+	/**
+	 * Per-user override meta. A numeric value wins over the site option, so a
+	 * subscription tier can raise one teacher's limit without a schema change.
+	 */
+	public const LIMIT_META = 'tbtmg_max_generations_per_day';
+
+	/**
+	 * Prefix for the per-window counter meta.
+	 */
+	public const COUNT_META_PREFIX = 'tbtmg_gen_count_';
+
 	private OpenAI_Client $openai;
 	private Game_Validator $validator;
 
@@ -79,8 +100,11 @@ final class Generation_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function permissions_check() {
-		$capability = (string) apply_filters( 'tbt_matching_games_generation_capability', 'manage_options' );
-		if ( ! current_user_can( $capability ) ) {
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error( 'tbtmg_not_logged_in', __( 'You must be logged in to generate matching games.', 'tbt-matching-games' ), array( 'status' => 401 ) );
+		}
+
+		if ( ! Access::can_generate() ) {
 			return new \WP_Error( 'tbtmg_forbidden', __( 'You are not allowed to generate matching games.', 'tbt-matching-games' ), array( 'status' => 403 ) );
 		}
 
@@ -124,43 +148,114 @@ final class Generation_Controller {
 
 		do_action( 'tbt_matching_games_after_generate', $validated, get_current_user_id() );
 
+		// Only a successful generation consumes quota: a failed API call is not
+		// the teacher's fault and must not cost them a lesson's worth of tries.
+		self::record_generation( get_current_user_id() );
+
 		return new \WP_REST_Response(
 			array(
 				'success'    => true,
 				'game'       => $validated,
 				'generation' => $validated['generation'],
+				'remaining'  => self::generations_remaining( get_current_user_id() ),
 			),
 			200
 		);
 	}
 
 	/**
-	 * Enforce a simple per-user generation throttle.
+	 * The counter window in seconds. A day by default.
+	 *
+	 * @return int
+	 */
+	public static function window(): int {
+		return max( 60, absint( apply_filters( 'tbt_matching_games_generation_window', DAY_IN_SECONDS ) ) );
+	}
+
+	/**
+	 * The generation limit for one user. 0 means unlimited.
+	 *
+	 * @param int $user_id User ID.
+	 * @return int
+	 */
+	public static function limit_for_user( int $user_id ): int {
+		$override = get_user_meta( $user_id, self::LIMIT_META, true );
+		if ( '' !== $override && is_numeric( $override ) ) {
+			$limit = max( 0, (int) $override );
+		} else {
+			$limit = max( 0, (int) get_option( self::LIMIT_OPTION, self::DEFAULT_LIMIT ) );
+		}
+
+		return max( 0, absint( apply_filters( 'tbt_matching_games_generation_limit', $limit, $user_id ) ) );
+	}
+
+	/**
+	 * Meta key holding the current window's counter.
+	 *
+	 * Keyed by site-local date in the default daily case so a teacher's day
+	 * matches their own timezone rather than UTC.
+	 *
+	 * @return string
+	 */
+	public static function count_meta_key(): string {
+		$window = self::window();
+		if ( DAY_IN_SECONDS === $window ) {
+			return self::COUNT_META_PREFIX . current_time( 'Y-m-d' );
+		}
+
+		return self::COUNT_META_PREFIX . (int) floor( time() / $window );
+	}
+
+	/**
+	 * Generations this user has made in the current window.
+	 *
+	 * @param int $user_id User ID.
+	 * @return int
+	 */
+	public static function generations_used( int $user_id ): int {
+		return (int) get_user_meta( $user_id, self::count_meta_key(), true );
+	}
+
+	/**
+	 * Generations left in the current window. Null means unlimited.
+	 *
+	 * @param int $user_id User ID.
+	 * @return int|null
+	 */
+	public static function generations_remaining( int $user_id ): ?int {
+		$limit = self::limit_for_user( $user_id );
+		if ( 0 === $limit ) {
+			return null;
+		}
+
+		return max( 0, $limit - self::generations_used( $user_id ) );
+	}
+
+	/**
+	 * Record one successful generation.
+	 *
+	 * @param int $user_id User ID.
+	 * @return void
+	 */
+	private static function record_generation( int $user_id ): void {
+		update_user_meta( $user_id, self::count_meta_key(), self::generations_used( $user_id ) + 1 );
+	}
+
+	/**
+	 * Enforce the per-user generation quota.
 	 *
 	 * @return true|\WP_Error
 	 */
 	private function check_rate_limit() {
-		$user_id = get_current_user_id();
-		$limit   = max( 1, absint( apply_filters( 'tbt_matching_games_generation_limit', 10 ) ) );
-		$window  = max( 60, absint( apply_filters( 'tbt_matching_games_generation_window', 300 ) ) );
-		$key     = 'tbtmg_gen_' . $user_id;
-		$state   = get_transient( $key );
-		$state   = is_array( $state ) ? $state : array( 'count' => 0, 'started' => time() );
-
-		if ( time() - absint( $state['started'] ?? 0 ) >= $window ) {
-			$state = array( 'count' => 0, 'started' => time() );
+		$remaining = self::generations_remaining( get_current_user_id() );
+		if ( null === $remaining || $remaining > 0 ) {
+			return true;
 		}
 
-		if ( absint( $state['count'] ?? 0 ) >= $limit ) {
-			return new \WP_Error(
-				'tbtmg_local_rate_limit',
-				__( 'Too many generation requests were made. Please try again shortly.', 'tbt-matching-games' ),
-				array( 'status' => 429 )
-			);
-		}
-
-		$state['count'] = absint( $state['count'] ?? 0 ) + 1;
-		set_transient( $key, $state, $window );
-		return true;
+		return new \WP_Error(
+			'tbtmg_local_rate_limit',
+			__( 'You have used this period\'s generation limit. Please try again later.', 'tbt-matching-games' ),
+			array( 'status' => 429 )
+		);
 	}
 }

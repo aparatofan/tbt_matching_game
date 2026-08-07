@@ -51,9 +51,15 @@ final class Plugin {
 		( new Post_Type() )->hooks();
 		$assets->hooks();
 		( new Shortcode( $this->renderer ) )->hooks();
+		( new Tools_Shortcode( $this->repository, $assets ) )->hooks();
 		( new Template_Loader() )->hooks();
 		( new Generation_Controller( $openai, $validator ) )->hooks();
+		( new Games_Controller( $this->repository, $validator ) )->hooks();
 		( new Admin( $this->repository, $validator, $openai ) )->hooks();
+
+		// Activation does not fire for an already-active plugin, so an existing
+		// install picks the capability up here instead.
+		add_action( 'init', array( Access::class, 'maybe_add_caps' ), 5 );
 	}
 
 	/**

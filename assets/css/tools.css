@@ -1,0 +1,515 @@
+/**
+ * TBT Teaching Tools — front-end generator and library.
+ *
+ * Written for a Divi page, not wp-admin: admin.css is never loaded here. The
+ * tokens mirror TBT Swipe's shared tbt-tokens.css by value, but are declared
+ * with fallbacks rather than by loading that file, so the tools look the same
+ * whether or not another TBT plugin is on the page.
+ */
+
+.tbt-tool {
+	--tbtmg-ink: var(--tbt-ink, #0e2a4f);
+	--tbtmg-ink-soft: var(--tbt-ink-soft, #4e6689);
+	--tbtmg-ink-faint: var(--tbt-ink-faint, #8299b8);
+	--tbtmg-blue: var(--tbt-blue, #0856c9);
+	--tbtmg-blue-deep: var(--tbt-blue-deep, #06429b);
+	--tbtmg-periwinkle: var(--tbt-periwinkle, #7ba7e8);
+	--tbtmg-blue-wash: var(--tbt-blue-wash, #e3eefd);
+	--tbtmg-blue-tint: var(--tbt-blue-tint, #f0f5fe);
+	--tbtmg-danger: var(--tbt-maroon, #660000);
+	--tbtmg-green: var(--tbt-green, #2e7d4f);
+	--tbtmg-surface: var(--tbt-surface, #ffffff);
+	--tbtmg-canvas: var(--tbt-canvas, #edf3fc);
+	--tbtmg-line: var(--tbt-line, #d5e2f5);
+	--tbtmg-r-sm: var(--tbt-r-sm, 8px);
+	--tbtmg-r-md: var(--tbt-r-md, 12px);
+	--tbtmg-r-lg: var(--tbt-r-lg, 16px);
+	--tbtmg-display: var(--tbt-display, "Roboto Slab", Georgia, serif);
+	--tbtmg-body: var(--tbt-body, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
+	--tbtmg-shadow: var(--tbt-shadow-sm, 0 1px 2px rgba(14, 42, 79, 0.06), 0 2px 8px rgba(14, 42, 79, 0.06));
+
+	max-width: 900px;
+	margin: 0 auto;
+	padding: 0;
+	color: var(--tbtmg-ink);
+	font-family: var(--tbtmg-body);
+	font-size: 16px;
+	line-height: 1.55;
+}
+
+/* Zero-specificity reset so a Divi theme's typography stops at the tool edge. */
+:where(.tbt-tool), :where(.tbt-tool *), :where(.tbt-tool *::before), :where(.tbt-tool *::after) {
+	box-sizing: border-box;
+}
+
+:where(.tbt-tool p, .tbt-tool h1, .tbt-tool h2, .tbt-tool h3, .tbt-tool h4, .tbt-tool ol, .tbt-tool ul, .tbt-tool li) {
+	margin: 0;
+	padding: 0;
+}
+
+:where(.tbt-tool ol, .tbt-tool ul) {
+	list-style: none;
+}
+
+:where(.tbt-tool button) {
+	font: inherit;
+	color: inherit;
+	background: none;
+	border: 0;
+	cursor: pointer;
+}
+
+:where(.tbt-tool input, .tbt-tool select, .tbt-tool textarea) {
+	font: inherit;
+	color: inherit;
+}
+
+/* Divi sets display on many elements, which beats [hidden]'s default. */
+:where(.tbt-tool) [hidden] {
+	display: none !important;
+}
+
+.tbt-tool :focus-visible {
+	outline: 3px solid var(--tbtmg-periwinkle);
+	outline-offset: 2px;
+	border-radius: var(--tbtmg-r-sm);
+}
+
+.tbtmg-tool--gate {
+	padding: 24px;
+	border: 1px solid var(--tbtmg-line);
+	border-radius: var(--tbtmg-r-lg);
+	background: var(--tbtmg-blue-tint);
+	text-align: center;
+}
+
+.tbtmg-tool--gate p + p {
+	margin-top: 16px;
+}
+
+/* ---------- Fields ---------- */
+
+.tbtmg-field {
+	margin-bottom: 16px;
+}
+
+.tbtmg-field label {
+	display: block;
+	margin-bottom: 6px;
+	color: var(--tbtmg-ink-soft);
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.tbtmg-field input[type="text"],
+.tbtmg-field input[type="search"],
+.tbtmg-field select,
+.tbtmg-field textarea,
+.tbtmg-pair__side,
+.tbtmg-copy__row input {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	padding: 10px 12px;
+	border: 1px solid var(--tbtmg-line);
+	border-radius: var(--tbtmg-r-sm);
+	background: var(--tbtmg-surface);
+	color: var(--tbtmg-ink);
+	/* 16px keeps iOS from zooming the page when a field takes focus. */
+	font-size: 16px;
+	line-height: 1.4;
+}
+
+.tbtmg-field textarea,
+.tbtmg-pair__side {
+	resize: vertical;
+}
+
+.tbtmg-field--narrow select {
+	max-width: 160px;
+}
+
+.tbtmg-hint {
+	margin-bottom: 12px;
+	color: var(--tbtmg-ink-soft);
+	font-size: 14px;
+}
+
+/* ---------- Buttons ---------- */
+
+.tbtmg-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	/* 44px tall: a thumb target, not a mouse target. */
+	min-height: 44px;
+	padding: 10px 18px;
+	border: 1px solid var(--tbtmg-line);
+	border-radius: var(--tbtmg-r-sm);
+	background: var(--tbtmg-surface);
+	color: var(--tbtmg-ink);
+	font-size: 15px;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.tbtmg-button:hover {
+	border-color: var(--tbtmg-periwinkle);
+	background: var(--tbtmg-blue-tint);
+	text-decoration: none;
+}
+
+.tbtmg-button[disabled] {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.tbtmg-button--primary {
+	border-color: var(--tbtmg-blue);
+	background: var(--tbtmg-blue);
+	color: #fff;
+}
+
+.tbtmg-button--primary:hover {
+	border-color: var(--tbtmg-blue-deep);
+	background: var(--tbtmg-blue-deep);
+	color: #fff;
+}
+
+.tbtmg-button--large {
+	min-height: 52px;
+	padding: 12px 28px;
+	font-size: 17px;
+}
+
+.tbtmg-button--small {
+	min-height: 40px;
+	padding: 8px 14px;
+	font-size: 14px;
+}
+
+.tbtmg-button--danger:hover {
+	border-color: var(--tbtmg-danger);
+	background: #fdecec;
+	color: var(--tbtmg-danger);
+}
+
+.tbtmg-icon-button {
+	min-width: 40px;
+	min-height: 40px;
+	border: 1px solid var(--tbtmg-line);
+	border-radius: var(--tbtmg-r-sm);
+	background: var(--tbtmg-surface);
+	font-size: 16px;
+	line-height: 1;
+}
+
+.tbtmg-icon-button[disabled] {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+.tbtmg-icon-button--danger:hover {
+	border-color: var(--tbtmg-danger);
+	color: var(--tbtmg-danger);
+}
+
+.tbtmg-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: center;
+}
+
+.tbtmg-actions--save {
+	margin-top: 20px;
+}
+
+.tbtmg-status {
+	color: var(--tbtmg-ink-soft);
+	font-size: 14px;
+}
+
+/* ---------- Notices ---------- */
+
+.tbtmg-notice {
+	margin-bottom: 16px;
+	padding: 12px 14px;
+	border-left: 4px solid var(--tbtmg-blue);
+	border-radius: var(--tbtmg-r-sm);
+	background: var(--tbtmg-blue-tint);
+	font-size: 15px;
+}
+
+.tbtmg-notice--error {
+	border-left-color: var(--tbtmg-danger);
+	background: #fdecec;
+	color: var(--tbtmg-danger);
+}
+
+/* ---------- Panels ---------- */
+
+.tbtmg-panel {
+	margin-bottom: 14px;
+	border: 1px solid var(--tbtmg-line);
+	border-radius: var(--tbtmg-r-lg);
+	background: var(--tbtmg-surface);
+	box-shadow: var(--tbtmg-shadow);
+	overflow: hidden;
+}
+
+.tbtmg-panel__heading {
+	margin: 0;
+	font-size: 16px;
+}
+
+.tbtmg-panel__toggle {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	width: 100%;
+	min-height: 52px;
+	padding: 14px 18px;
+	background: var(--tbtmg-blue-tint);
+	font-family: var(--tbtmg-display);
+	font-size: 17px;
+	font-weight: 700;
+	text-align: left;
+}
+
+.tbtmg-panel__count {
+	margin-left: auto;
+	color: var(--tbtmg-ink-soft);
+	font-family: var(--tbtmg-body);
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.tbtmg-panel__chevron {
+	width: 10px;
+	height: 10px;
+	margin-left: 4px;
+	border-right: 2px solid var(--tbtmg-ink-soft);
+	border-bottom: 2px solid var(--tbtmg-ink-soft);
+	transform: rotate(45deg);
+	transition: transform 0.18s ease;
+}
+
+.tbtmg-panel.is-open .tbtmg-panel__chevron {
+	transform: rotate(-135deg);
+}
+
+.tbtmg-panel__body {
+	padding: 18px;
+}
+
+/* ---------- Pair editor ---------- */
+
+.tbtmg-pairs {
+	margin-bottom: 14px;
+}
+
+.tbtmg-pair {
+	display: grid;
+	grid-template-columns: 28px 1fr 1fr auto;
+	gap: 10px;
+	align-items: start;
+	padding: 10px 0;
+	border-top: 1px solid var(--tbtmg-line);
+}
+
+.tbtmg-pair:first-child {
+	border-top: 0;
+}
+
+.tbtmg-pair__index {
+	padding-top: 12px;
+	color: var(--tbtmg-ink-faint);
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.tbtmg-pair__actions {
+	display: flex;
+	gap: 4px;
+}
+
+.tbtmg-pair-validation {
+	margin-bottom: 10px;
+	color: var(--tbtmg-ink-soft);
+	font-size: 14px;
+}
+
+.tbtmg-pair-validation.is-invalid {
+	color: var(--tbtmg-danger);
+	font-weight: 600;
+}
+
+/* ---------- Library ---------- */
+
+.tbtmg-library__head {
+	margin-bottom: 8px;
+}
+
+.tbtmg-game-row {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 12px;
+	margin-bottom: 12px;
+	padding: 16px 18px;
+	border: 1px solid var(--tbtmg-line);
+	border-radius: var(--tbtmg-r-lg);
+	background: var(--tbtmg-surface);
+	box-shadow: var(--tbtmg-shadow);
+}
+
+.tbtmg-game-row__title {
+	font-family: var(--tbtmg-display);
+	font-size: 18px;
+	font-weight: 700;
+}
+
+.tbtmg-game-row__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	align-items: center;
+	margin-top: 6px;
+	color: var(--tbtmg-ink-soft);
+	font-size: 13px;
+}
+
+.tbtmg-game-row__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: flex-start;
+}
+
+.tbtmg-game-row .tbtmg-share {
+	grid-column: 1 / -1;
+}
+
+.tbtmg-badge {
+	padding: 3px 10px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.tbtmg-badge--published {
+	background: #e4f5ea;
+	color: var(--tbtmg-green);
+}
+
+.tbtmg-badge--draft {
+	background: var(--tbtmg-canvas);
+	color: var(--tbtmg-ink-soft);
+}
+
+.tbtmg-pagination {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	justify-content: center;
+	margin-top: 16px;
+}
+
+.tbtmg-pagination__label {
+	color: var(--tbtmg-ink-soft);
+	font-size: 14px;
+}
+
+/* ---------- Share ---------- */
+
+.tbtmg-share__inner {
+	margin-top: 14px;
+	padding: 16px;
+	border: 1px solid var(--tbtmg-line);
+	border-radius: var(--tbtmg-r-md);
+	background: var(--tbtmg-blue-tint);
+}
+
+.tbtmg-copy + .tbtmg-copy,
+.tbtmg-qr + .tbtmg-copy {
+	margin-top: 14px;
+}
+
+.tbtmg-copy__label {
+	display: block;
+	margin-bottom: 6px;
+	color: var(--tbtmg-ink-soft);
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.tbtmg-copy__row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.tbtmg-copy__row input {
+	flex: 1 1 220px;
+	min-width: 0;
+}
+
+.tbtmg-qr {
+	margin-top: 16px;
+	text-align: center;
+}
+
+.tbtmg-qr__code {
+	display: inline-block;
+	padding: 12px;
+	border-radius: var(--tbtmg-r-md);
+	background: #fff;
+}
+
+.tbtmg-qr__code img,
+.tbtmg-qr__code canvas {
+	display: block;
+	max-width: 100%;
+	height: auto;
+}
+
+.tbtmg-qr__caption {
+	margin-top: 8px;
+	color: var(--tbtmg-ink-soft);
+	font-size: 13px;
+}
+
+/* ---------- Phone ---------- */
+
+@media (max-width: 760px) {
+	.tbtmg-pair {
+		grid-template-columns: 1fr;
+	}
+
+	.tbtmg-pair__index {
+		padding-top: 0;
+	}
+
+	.tbtmg-pair__actions {
+		justify-content: flex-end;
+	}
+
+	.tbtmg-game-row {
+		grid-template-columns: 1fr;
+	}
+
+	.tbtmg-game-row__actions {
+		justify-content: flex-start;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.tbt-tool *,
+	.tbt-tool *::before,
+	.tbt-tool *::after {
+		transition-duration: 0.001ms !important;
+		animation-duration: 0.001ms !important;
+	}
+}

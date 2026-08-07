@@ -10,6 +10,7 @@ TBT Matching Games is a WordPress plugin for creating editable, AI-assisted matc
 - Add, delete, and reorder pairs
 - Draft and published workflows
 - Shortcode: `[tbt_matching_game id="123"]`
+- Front-end teaching tools: `[tbt_matching_generator]` and `[tbt_matching_games]`
 - Standalone public game URL
 - Dragging in either direction
 - Click and keyboard matching
@@ -109,6 +110,67 @@ Optional display attributes are already supported:
 [tbt_matching_game id="123" show_title="no" show_instructions="yes" compact="yes"]
 ```
 
+## Teaching tools on the front end
+
+Two shortcodes put the whole authoring flow on the public site, so teachers never need
+wp-admin. Both are gated: logged-out visitors get a login prompt, logged-in users without
+access get an upsell, and no tool markup is rendered for either.
+
+```text
+[tbt_matching_generator]
+[tbt_matching_games]
+```
+
+`[tbt_matching_generator]` generates, edits and saves a game. It edits an existing game when
+the page is opened with `?game_id=123`, which is what the library's Edit links do.
+
+`[tbt_matching_games]` lists the games the current teacher owns, with server-side search,
+pagination, and per-row Edit, Share, Duplicate and Delete. Share shows the public link, a QR
+code rendered as the panel opens, and the embed shortcode.
+
+Access requires the `tbt_use_teaching_tools` capability, granted to the administrator role on
+activation. Grant it to a teacher role, or wire a membership check through
+`tbt_matching_games_can_use_tools`:
+
+```php
+add_filter(
+	'tbt_matching_games_can_use_tools',
+	function ( $allowed, $user_id ) {
+		return $allowed || my_membership_is_active( $user_id );
+	},
+	10,
+	2
+);
+```
+
+Saving decides the status: a game with 4–12 complete pairs publishes, anything less is kept
+as a draft with the validation message, and the teacher's work is never discarded. Ownership
+is `post_author`; a published game is deliberately viewable by anyone holding the link, since
+students scan a QR code without logging in.
+
+### REST routes
+
+All routes live under `tbt-matching-games/v1`, require a `wp_rest` nonce in `X-WP-Nonce`, and
+are scoped to the games the current user owns. An administrator may pass `author=0` to `GET
+/games` to see every game; nobody else can widen the scope.
+
+| Method | Route | Purpose |
+|---|---|---|
+| POST | `/generate` | Generate content without saving it |
+| GET | `/games` | List own games (`search`, `page`, `per_page`, `status`) |
+| POST | `/games` | Create |
+| GET | `/games/{id}` | Read one |
+| PUT | `/games/{id}` | Update |
+| POST | `/games/{id}/duplicate` | Copy as a draft owned by the current user |
+| DELETE | `/games/{id}` | Move to trash (never a force delete) |
+
+### AI usage limits
+
+Successful generations are counted per user, per day, in the `tbtmg_gen_count_{Y-m-d}` user
+meta. The site-wide default comes from the `tbtmg_max_generations_per_day` option (20; `0`
+means unlimited) and one teacher can be given a different limit through the user meta key of
+the same name. A failed API call never consumes quota.
+
 ## Theme override
 
 A theme may override the standalone template by adding:
@@ -124,6 +186,10 @@ The plugin fallback template remains available when no override exists.
 - `tbt_matching_games_openai_api_key`
 - `tbt_matching_games_openai_model`
 - `tbt_matching_games_generation_capability`
+- `tbt_matching_games_can_use_tools`
+- `tbt_matching_games_upsell_html`
+- `tbt_matching_games_generator_url`
+- `tbt_matching_games_tool_roles`
 - `tbt_matching_games_openai_endpoint`
 - `tbt_matching_games_openai_timeout`
 - `tbt_matching_games_generation_limit`
@@ -142,10 +208,10 @@ The plugin fallback template remains available when no override exists.
 ## Security notes
 
 - The browser sends generation requests only to a protected WordPress REST route.
-- The route requires a WordPress REST nonce and the configured capability, `manage_options` by default.
+- The route requires a WordPress REST nonce and the `tbt_use_teaching_tools` capability. A site that sets `tbt_matching_games_generation_capability` narrows it further.
 - All game data is validated and sanitised on the server.
 - Generated game text is stored and rendered as plain text, not HTML.
-- A simple per-user generation throttle defaults to ten requests per five minutes.
+- AI generation is capped per user per day (20 by default), counted only on success.
 - Draft and private games are not rendered publicly.
 
 ## Uninstalling
@@ -171,6 +237,7 @@ Run JavaScript syntax checks:
 ```bash
 node --check assets/js/admin.js
 node --check assets/js/game.js
+node --check assets/js/tools.js
 ```
 
 See `tests/manual-test-checklist.md` for WordPress and browser acceptance testing.
