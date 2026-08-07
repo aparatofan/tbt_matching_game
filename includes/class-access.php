@@ -26,11 +26,26 @@ final class Access {
 	public const CAPABILITY = 'tbt_use_teaching_tools';
 
 	/**
+	 * TBT Swipe's own teacher capability.
+	 *
+	 * Swipe shipped first and its capability is what a teacher role on the live
+	 * site already carries. Honouring it here means a teacher who can reach
+	 * Swipe can reach this tool too, with nothing to configure — the tools are
+	 * one product to the teacher, so one grant should open both.
+	 */
+	public const SWIPE_CAPABILITY = 'tbts_manage';
+
+	/**
+	 * The option Swipe stores its granted roles in.
+	 */
+	private const SWIPE_ROLES_OPTION = 'tbt_swipe_manager_roles';
+
+	/**
 	 * Bumped when the capability set changes so existing installs pick it up.
 	 * register_activation_hook does not fire for an already-active plugin, so
 	 * activation alone is not enough.
 	 */
-	public const CAPS_VERSION = '1';
+	public const CAPS_VERSION = '2';
 
 	/**
 	 * Option holding the granted capability version.
@@ -53,7 +68,9 @@ final class Access {
 			return false;
 		}
 
-		$allowed = current_user_can( self::CAPABILITY ) || current_user_can( 'manage_options' );
+		$allowed = current_user_can( self::CAPABILITY )
+			|| current_user_can( self::SWIPE_CAPABILITY )
+			|| current_user_can( 'manage_options' );
 
 		/**
 		 * Filter whether a user may use the front-end teaching tools.
@@ -130,7 +147,15 @@ final class Access {
 	 * @return void
 	 */
 	public static function add_caps(): void {
-		$roles = (array) apply_filters( 'tbt_matching_games_tool_roles', array( 'administrator' ) );
+		$roles = array( 'administrator' );
+
+		// Any role already trusted with Swipe is a teacher role here too.
+		$swipe_roles = get_option( self::SWIPE_ROLES_OPTION, array() );
+		if ( is_array( $swipe_roles ) ) {
+			$roles = array_merge( $roles, array_map( 'strval', $swipe_roles ) );
+		}
+
+		$roles = array_unique( (array) apply_filters( 'tbt_matching_games_tool_roles', $roles ) );
 		foreach ( $roles as $role_slug ) {
 			$role = get_role( (string) $role_slug );
 			if ( $role && ! $role->has_cap( self::CAPABILITY ) ) {

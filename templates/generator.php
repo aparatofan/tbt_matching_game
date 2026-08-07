@@ -110,6 +110,7 @@ $tbtmg_stage = 0;
 			</button>
 		</h2>
 		<div class="tbtmg-panel__body" id="<?php echo esc_attr( $tbtmg_uid ); ?>-wording" hidden>
+			<p class="tbtmg-hint"><?php esc_html_e( 'Change or edit the texts that appear on the game.', 'tbt-matching-games' ); ?></p>
 			<?php if ( empty( $can_generate ) ) : ?>
 				<div class="tbtmg-field">
 					<label for="<?php echo esc_attr( $tbtmg_uid ); ?>-title"><?php esc_html_e( 'Game title', 'tbt-matching-games' ); ?></label>

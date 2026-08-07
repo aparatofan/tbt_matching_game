@@ -147,8 +147,16 @@ add_filter(
 );
 ```
 
-The tool pages follow The Blue Tree Style Book v1.0: canonical tokens declared in a
-`tbt-defaults` cascade layer, so a site-wide token file or a snippet setting
+The page background is the Style Book tool canvas, `#F6F8FC`. To make the white stage
+cards stand out more, override the token from a snippet rather than editing the plugin:
+
+```css
+:root { --tbt-canvas: #F0F5FE; }
+```
+
+The tool pages follow The Blue Tree Style Book v1.0 with two deliberate exceptions —
+buttons use the Swipe pill and the library spine uses the Learn English domain colour —
+and canonical tokens declared in a `tbt-defaults` cascade layer, so a site-wide token file or a snippet setting
 `--tbt-blue` on `:root` overrides them and the plugin still renders canonically on its
 own. Roboto, Roboto Slab and Roboto Mono arrive on the font request the plugin already
 makes; content the teacher authors is set in Roboto Slab and interface chrome in Roboto.
@@ -157,8 +165,11 @@ makes; content the teacher authors is set in Roboto Slab and interface chrome in
 pagination, and per-row Edit, Share, Duplicate and Delete. Share shows the public link, a QR
 code rendered as the panel opens, and the embed shortcode.
 
-Access requires the `tbt_use_teaching_tools` capability, granted to the administrator role on
-activation. Grant it to a teacher role, or wire a membership check through
+Access requires the `tbt_use_teaching_tools` capability, granted on activation to the
+administrator role and to every role listed in TBT Swipe's `tbt_swipe_manager_roles`
+option. A user holding Swipe's own `tbts_manage` capability is also allowed, so a teacher
+who can reach Swipe can reach this tool with nothing to configure. Beyond that, grant the
+capability to a role or wire a membership check through
 `tbt_matching_games_can_use_tools`:
 
 ```php
