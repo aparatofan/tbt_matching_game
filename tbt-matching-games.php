@@ -35,6 +35,7 @@ $includes = array(
 	'class-template-loader.php',
 	'class-openai-client.php',
 	'class-generation-controller.php',
+	'class-games-controller.php',
 	'class-admin.php',
 	'class-plugin.php',
 );

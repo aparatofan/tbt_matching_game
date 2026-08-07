@@ -53,6 +53,7 @@ final class Plugin {
 		( new Shortcode( $this->renderer ) )->hooks();
 		( new Template_Loader() )->hooks();
 		( new Generation_Controller( $openai, $validator ) )->hooks();
+		( new Games_Controller( $this->repository, $validator ) )->hooks();
 		( new Admin( $this->repository, $validator, $openai ) )->hooks();
 
 		// Activation does not fire for an already-active plugin, so an existing

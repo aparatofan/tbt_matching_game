@@ -129,6 +129,60 @@ final class Game_Validator {
 			$settings[ $key ] = (bool) $value;
 		}
 
+		return $this->build( $title, $topic, $clean_pairs, $settings, $raw );
+	}
+
+	/**
+	 * Sanitise a payload without enforcing the completeness rules.
+	 *
+	 * Used for draft saves from the front-end tools, where a teacher's
+	 * half-finished work must survive even though it cannot be published yet.
+	 * Every field passes through the same cleaning as validate(); only the
+	 * pair count, empty-side and duplicate guards are skipped.
+	 *
+	 * @param array $raw Raw game data.
+	 * @return array
+	 */
+	public function sanitise( array $raw ): array {
+		$defaults = Game_Repository::default_data();
+		$title    = $this->clean_text( $raw['title'] ?? '', 200 );
+		$topic    = $this->clean_textarea( $raw['topic'] ?? '', 500 );
+		$pairs    = isset( $raw['pairs'] ) && is_array( $raw['pairs'] ) ? array_values( $raw['pairs'] ) : array();
+
+		$clean_pairs = array();
+		foreach ( $pairs as $index => $pair ) {
+			if ( ! is_array( $pair ) ) {
+				continue;
+			}
+
+			$clean_pairs[] = array(
+				'id'    => 'pair_' . ( $index + 1 ),
+				'left'  => $this->clean_textarea( $pair['left'] ?? '', 500 ),
+				'right' => $this->clean_textarea( $pair['right'] ?? '', 500 ),
+			);
+		}
+
+		$settings = isset( $raw['settings'] ) && is_array( $raw['settings'] ) ? $raw['settings'] : array();
+		$settings = array_merge( $defaults['settings'], array_intersect_key( $settings, $defaults['settings'] ) );
+		foreach ( $settings as $key => $value ) {
+			$settings[ $key ] = (bool) $value;
+		}
+
+		return $this->build( $title, $topic, $clean_pairs, $settings, $raw );
+	}
+
+	/**
+	 * Assemble the canonical array from already-cleaned parts.
+	 *
+	 * @param string $title Clean title.
+	 * @param string $topic Clean topic.
+	 * @param array  $clean_pairs Clean pairs.
+	 * @param array  $settings Clean settings.
+	 * @param array  $raw Raw game data for the remaining text fields.
+	 * @return array
+	 */
+	private function build( string $title, string $topic, array $clean_pairs, array $settings, array $raw ): array {
+		$defaults   = Game_Repository::default_data();
 		$generation = isset( $raw['generation'] ) && is_array( $raw['generation'] ) ? $raw['generation'] : array();
 
 		return array(
