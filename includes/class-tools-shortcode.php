@@ -40,9 +40,10 @@ final class Tools_Shortcode {
 	/**
 	 * Render the generator tool.
 	 *
+	 * @param array|string $atts Shortcode attributes.
 	 * @return string
 	 */
-	public function render_generator(): string {
+	public function render_generator( $atts = array() ): string {
 		$gate = $this->gate();
 		if ( null !== $gate ) {
 			return $gate;
@@ -63,6 +64,7 @@ final class Tools_Shortcode {
 				'permalink'    => $game_id ? (string) get_permalink( $game_id ) : '',
 				'can_generate' => Access::can_generate(),
 				'denied'       => $this->requested_but_denied(),
+				'hero'         => $this->hero( 'generator', $atts ),
 			)
 		);
 	}
@@ -70,9 +72,10 @@ final class Tools_Shortcode {
 	/**
 	 * Render the library tool.
 	 *
+	 * @param array|string $atts Shortcode attributes.
 	 * @return string
 	 */
-	public function render_library(): string {
+	public function render_library( $atts = array() ): string {
 		$gate = $this->gate();
 		if ( null !== $gate ) {
 			return $gate;
@@ -80,7 +83,53 @@ final class Tools_Shortcode {
 
 		$this->assets->enqueue_tools();
 
-		return $this->template( 'library.php', array() );
+		return $this->template( 'library.php', array( 'hero' => $this->hero( 'library', $atts ) ) );
+	}
+
+	/**
+	 * Hero copy for a tool page, or null when the page suppresses it.
+	 *
+	 * @param string       $context Either 'generator' or 'library'.
+	 * @param array|string $atts Shortcode attributes.
+	 * @return array|null
+	 */
+	private function hero( string $context, $atts ): ?array {
+		$atts = shortcode_atts(
+			array( 'hero' => 'yes' ),
+			is_array( $atts ) ? $atts : array(),
+			'generator' === $context ? self::GENERATOR_SHORTCODE : self::LIBRARY_SHORTCODE
+		);
+
+		if ( 'no' === strtolower( (string) $atts['hero'] ) ) {
+			return null;
+		}
+
+		$defaults = 'library' === $context
+			? array(
+				'eyebrow' => __( 'THE BLUE TREE', 'tbt-matching-games' ),
+				'title'   => __( 'MY MATCHING GAMES', 'tbt-matching-games' ),
+				'support' => __( 'Everything you have created', 'tbt-matching-games' ),
+			)
+			: array(
+				'eyebrow' => __( 'THE BLUE TREE', 'tbt-matching-games' ),
+				'title'   => __( 'MATCHING GAME', 'tbt-matching-games' ),
+				'support' => __( 'Create a matching game for your class', 'tbt-matching-games' ),
+			);
+
+		/**
+		 * Filter the Tool Hero copy.
+		 *
+		 * @param array  $hero    Eyebrow, title and support line.
+		 * @param string $context Either 'generator' or 'library'.
+		 */
+		$hero = apply_filters( 'tbt_matching_games_hero', $defaults, $context );
+		$hero = is_array( $hero ) ? array_merge( $defaults, $hero ) : $defaults;
+
+		return array(
+			'eyebrow' => (string) $hero['eyebrow'],
+			'title'   => (string) $hero['title'],
+			'support' => (string) $hero['support'],
+		);
 	}
 
 	/**
