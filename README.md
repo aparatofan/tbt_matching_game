@@ -124,11 +124,14 @@ access get an upsell, and no tool markup is rendered for either.
 `[tbt_matching_generator]` generates, edits and saves a game. It edits an existing game when
 the page is opened with `?game_id=123`, which is what the library's Edit links do.
 
-Both pages open with the canonical Tool Hero. Its copy is filterable, and a page that
-already has a hero of its own can suppress it:
+The generator opens with the canonical Tool Hero. The library does not: the two normally
+share a page, and a second hero would only repeat the first. Either shortcode can be told
+otherwise — `hero="no"` suppresses the generator's, `hero="yes"` gives a standalone library
+one of its own:
 
 ```text
 [tbt_matching_generator hero="no"]
+[tbt_matching_games hero="yes"]
 ```
 
 ```php
