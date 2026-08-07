@@ -51,6 +51,7 @@ final class Plugin {
 		( new Post_Type() )->hooks();
 		$assets->hooks();
 		( new Shortcode( $this->renderer ) )->hooks();
+		( new Tools_Shortcode( $this->repository, $assets ) )->hooks();
 		( new Template_Loader() )->hooks();
 		( new Generation_Controller( $openai, $validator ) )->hooks();
 		( new Games_Controller( $this->repository, $validator ) )->hooks();
