@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.1 — 2026-08-07
+
+- Fixed teachers being locked out of the tools. A role granted TBT Swipe's
+  `tbts_manage` capability now reaches the matching game as well, and the
+  plugin's own capability is granted on upgrade to every role Swipe already
+  trusts.
+- Buttons follow the Swipe pill: fully rounded, uppercase and tracked.
+- The game library's row spine uses the Learn English domain colour, and keeps
+  it while the rest of the row highlights on hover.
+- Widened the hero's eyebrow-to-title spacing to match the player's hero.
+- The Wording stage now explains what it is for.
+
 ## 0.3.0 — 2026-08-07
 
 - Aligned the front-end tool pages with The Blue Tree Style Book v1.0.

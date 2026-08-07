@@ -17,6 +17,7 @@
 	:root {
 		--tbt-blue: #0856C9;
 		--tbt-blue-dark: #063F94;
+		--tbt-le: #660000;
 		--tbt-canvas: #F6F8FC;
 		--tbt-surface: #FFFFFF;
 		--tbt-input: #F0F5FE;
@@ -131,7 +132,7 @@ body {
  * back in the theme's own colour and face, which is the whole header gone.
  */
 .tbt-tool .tbt-tool-hero__eyebrow {
-	margin: 0 0 6px !important;
+	margin: 0 0 25px !important;
 	padding: 0 !important;
 	color: inherit !important;
 	font-family: var(--tbt-font-identity) !important;
@@ -262,16 +263,20 @@ body {
 	align-items: center;
 	justify-content: center;
 	min-height: 44px;
-	padding: 12px 24px;
+	padding: 12px 32px;
 	border: 1px solid var(--tbt-border);
-	border-radius: var(--tbt-radius-control);
+	/* Swipe's pill, on Mariusz's call — a deliberate break from §7. */
+	border-radius: 999px;
 	background: var(--tbt-surface);
 	color: var(--tbt-blue);
 	font-family: var(--tbt-font-ui);
 	font-size: 16px;
 	font-weight: 600;
 	line-height: 1.2;
+	letter-spacing: .08em;
+	text-transform: uppercase;
 	text-decoration: none;
+	white-space: nowrap;
 	transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease;
 }
 
@@ -293,6 +298,7 @@ body {
 	background: var(--tbt-blue);
 	color: #FFFFFF;
 	font-weight: 700;
+	box-shadow: 0 2px 6px rgba(8, 86, 201, .24), 0 10px 24px rgba(8, 86, 201, .18);
 }
 
 .tbtmg-button--primary:hover {
@@ -305,12 +311,12 @@ body {
 
 .tbtmg-button--large {
 	min-height: 48px;
-	padding: 12px 32px;
+	padding: 16px 48px;
 }
 
 .tbtmg-button--small {
 	min-height: 40px;
-	padding: 8px 16px;
+	padding: 8px 24px;
 	font-size: 14px;
 }
 
@@ -349,7 +355,7 @@ body {
 	width: 40px;
 	height: 40px;
 	border: 1px solid var(--tbt-border);
-	border-radius: 10px;
+	border-radius: 999px;
 	background: var(--tbt-surface);
 	color: var(--tbt-ink);
 	font-family: var(--tbt-font-ui);
@@ -585,8 +591,8 @@ body {
 	align-items: center;
 	padding: 16px 24px;
 	border: 1px solid var(--tbt-border);
-	/* Swipe's deck row: a blue spine on the leading edge. */
-	border-left: 6px solid var(--tbt-blue);
+	/* Swipe's deck row shape, with the Learn English domain colour as the spine. */
+	border-left: 6px solid var(--tbt-le);
 	border-radius: var(--tbt-radius-card);
 	background: var(--tbt-surface);
 	box-shadow: var(--tbt-shadow);
@@ -595,6 +601,8 @@ body {
 
 .tbtmg-game-row:hover {
 	border-color: var(--tbt-blue);
+	/* Re-asserted: the shorthand above would repaint the domain spine blue. */
+	border-left-color: var(--tbt-le);
 	box-shadow: var(--tbt-shadow-raised);
 	transform: translateY(-2px);
 }
