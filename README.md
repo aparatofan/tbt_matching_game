@@ -124,6 +124,35 @@ access get an upsell, and no tool markup is rendered for either.
 `[tbt_matching_generator]` generates, edits and saves a game. It edits an existing game when
 the page is opened with `?game_id=123`, which is what the library's Edit links do.
 
+Both pages open with the canonical Tool Hero. Its copy is filterable, and a page that
+already has a hero of its own can suppress it:
+
+```text
+[tbt_matching_generator hero="no"]
+```
+
+```php
+add_filter(
+	'tbt_matching_games_hero',
+	function ( $hero, $context ) {
+		// $context is 'generator' or 'library'.
+		return array(
+			'eyebrow' => 'THE BLUE TREE',
+			'title'   => 'library' === $context ? 'MOJE GRY' : 'GRA W DOPASOWANIE',
+			'support' => 'Stwórz grę dla swojej klasy',
+		);
+	},
+	10,
+	2
+);
+```
+
+The tool pages follow The Blue Tree Style Book v1.0: canonical tokens declared in a
+`tbt-defaults` cascade layer, so a site-wide token file or a snippet setting
+`--tbt-blue` on `:root` overrides them and the plugin still renders canonically on its
+own. Roboto, Roboto Slab and Roboto Mono arrive on the font request the plugin already
+makes; content the teacher authors is set in Roboto Slab and interface chrome in Roboto.
+
 `[tbt_matching_games]` lists the games the current teacher owns, with server-side search,
 pagination, and per-row Edit, Share, Duplicate and Delete. Share shows the public link, a QR
 code rendered as the panel opens, and the embed shortcode.
@@ -189,6 +218,7 @@ The plugin fallback template remains available when no override exists.
 - `tbt_matching_games_can_use_tools`
 - `tbt_matching_games_upsell_html`
 - `tbt_matching_games_generator_url`
+- `tbt_matching_games_hero`
 - `tbt_matching_games_tool_roles`
 - `tbt_matching_games_openai_endpoint`
 - `tbt_matching_games_openai_timeout`

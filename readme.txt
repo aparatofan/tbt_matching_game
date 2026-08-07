@@ -4,7 +4,7 @@ Tags: education, matching game, openai, shortcode, quiz
 Requires at least: 6.4
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 0.2.0
+Stable tag: 0.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,6 +26,11 @@ The front-end interaction supports drag-and-drop in either direction, click matc
 4. Open Matching Games > Add New.
 
 == Changelog ==
+
+= 0.3.0 =
+* Aligned the front-end tool pages with The Blue Tree Style Book v1.0.
+* Fixed delete buttons and error notices using the Learn English colour instead of error red.
+* Added the canonical Tool Hero, the tbt_matching_games_hero filter and a hero="no" attribute.
 
 = 0.2.0 =
 * Added the [tbt_matching_generator] and [tbt_matching_games] front-end teaching tools.

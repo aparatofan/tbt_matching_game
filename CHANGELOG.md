@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.3.0 — 2026-08-07
+
+- Aligned the front-end tool pages with The Blue Tree Style Book v1.0.
+- Fixed destructive and error affordances being painted in the Learn English
+  domain colour (`#660000`) instead of the error red (`#C62828`). Delete
+  buttons and error notices were carrying a content-identity colour.
+- Replaced the near-duplicate local colours with the canonical Style Book
+  tokens, declared in a cascade layer so a site-wide token file or a one-line
+  snippet overrides them while the plugin stays canonical on its own.
+- Added the canonical Tool Hero to the generator and the library, with copy
+  settable through the new `tbt_matching_games_hero` filter and a `hero="no"`
+  shortcode attribute for pages that already have one.
+- Applied the Style Book typography split: Roboto Slab for content the teacher
+  authors, Roboto for interface chrome, Roboto Mono for the hero identity.
+  Roboto is added to the font request the plugin already makes.
+- Generator panels are now stage cards and library rows are object cards, on
+  the pale tool canvas, with spacing from the shared scale.
+- Corrected two drifted tokens in the player's stylesheet (`muted`, `border`).
+
 ## 0.2.0 — 2026-08-07
 
 - Added `[tbt_matching_generator]`, a front-end generator so teachers build and edit games
