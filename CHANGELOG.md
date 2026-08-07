@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.2 — 2026-08-07
+
+- The game library no longer renders a hero of its own. It normally shares a
+  page with the generator, whose hero already owns the page identity, so the
+  second one only repeated it. `hero="yes"` brings it back for a library on a
+  page of its own.
+- After a game is saved, the save button becomes "Generate new game", which
+  reloads the generator ready for the next one. Editing anything afterwards
+  brings the save button back, so a follow-up correction can still be saved.
+
 ## 0.3.1 — 2026-08-07
 
 - Fixed teachers being locked out of the tools. A role granted TBT Swipe's

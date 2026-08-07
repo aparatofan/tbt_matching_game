@@ -4,7 +4,7 @@ Tags: education, matching game, openai, shortcode, quiz
 Requires at least: 6.4
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 0.3.1
+Stable tag: 0.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,6 +26,10 @@ The front-end interaction supports drag-and-drop in either direction, click matc
 4. Open Matching Games > Add New.
 
 == Changelog ==
+
+= 0.3.2 =
+* Removed the duplicate hero from the game library shortcode.
+* Added a "Generate new game" button that replaces Save once a game is saved.
 
 = 0.3.1 =
 * Fixed teachers with the TBT Swipe capability being denied access to the matching tools.

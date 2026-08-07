@@ -99,13 +99,19 @@ final class Tools_Shortcode {
 	 * @return array|null
 	 */
 	private function hero( string $context, $atts ): ?array {
+		/*
+		 * The library defaults to no hero: it normally shares a page with the
+		 * generator, whose hero already owns the page identity, and a second one
+		 * would just repeat it. hero="yes" brings it back for a library that
+		 * lives on its own page.
+		 */
 		$atts = shortcode_atts(
-			array( 'hero' => 'yes' ),
+			array( 'hero' => 'library' === $context ? 'no' : 'yes' ),
 			is_array( $atts ) ? $atts : array(),
 			'generator' === $context ? self::GENERATOR_SHORTCODE : self::LIBRARY_SHORTCODE
 		);
 
-		if ( 'no' === strtolower( (string) $atts['hero'] ) ) {
+		if ( 'yes' !== strtolower( (string) $atts['hero'] ) ) {
 			return null;
 		}
 

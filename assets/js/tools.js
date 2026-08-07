@@ -201,6 +201,7 @@
 		var pairCountBadge = root.querySelector('[data-tbtmg-pair-count]');
 		var sharePanel = root.querySelector('[data-tbtmg-share]');
 		var saveButton = root.querySelector('[data-tbtmg-save]');
+		var newButton = root.querySelector('[data-tbtmg-new]');
 		var saveStatus = root.querySelector('[data-tbtmg-save-status]');
 		var generateButton = root.querySelector('[data-tbtmg-generate]');
 		var generateStatus = root.querySelector('[data-tbtmg-generate-status]');
@@ -394,6 +395,8 @@
 				setPairs(game.pairs);
 				openPanelContaining(pairsList);
 				generateStatus.textContent = t('generated');
+				// Regenerating replaces the content, so there is something to save again.
+				offerSave();
 			}).catch(function (error) {
 				generateStatus.textContent = '';
 				notify(root, messageFor(error), true);
@@ -426,12 +429,46 @@
 					notify(root, response.message, true);
 				}
 				showShare(game);
+				offerNewGame();
 			}).catch(function (error) {
 				saveStatus.textContent = '';
 				notify(root, messageFor(error), true);
 			}).then(function () {
 				saveButton.disabled = false;
 			});
+		}
+
+		/**
+		 * After a save the obvious next move is a new game, not another save of
+		 * the same one, so the button swaps. Editing anything afterwards brings
+		 * Save back, otherwise a follow-up correction could not be saved.
+		 */
+		function offerNewGame() {
+			if (!newButton || !saveButton) {
+				return;
+			}
+
+			saveButton.hidden = true;
+			newButton.hidden = false;
+		}
+
+		function offerSave() {
+			if (!newButton || !saveButton || newButton.hidden) {
+				return;
+			}
+
+			newButton.hidden = true;
+			saveButton.hidden = false;
+			saveStatus.textContent = '';
+		}
+
+		function startNewGame() {
+			// A reload guarantees a clean slate — no stale pairs, generation
+			// metadata or share panel from the game just saved. The saved game
+			// is safe in the library.
+			var url = new URL(window.location.href);
+			url.searchParams.delete('game_id');
+			window.location.href = url.toString();
 		}
 
 		function openPanelContaining(node) {
@@ -453,6 +490,10 @@
 		if (saveButton) {
 			saveButton.addEventListener('click', save);
 		}
+		if (newButton) {
+			newButton.addEventListener('click', startNewGame);
+		}
+		root.addEventListener('input', offerSave);
 
 		var addPair = root.querySelector('[data-tbtmg-add-pair]');
 		if (addPair) {

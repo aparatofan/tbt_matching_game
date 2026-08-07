@@ -179,6 +179,7 @@ $tbtmg_stage = 0;
 
 	<div class="tbtmg-actions tbtmg-actions--save">
 		<button type="button" class="tbtmg-button tbtmg-button--primary tbtmg-button--large" data-tbtmg-save><?php esc_html_e( 'Save game', 'tbt-matching-games' ); ?></button>
+		<button type="button" class="tbtmg-button tbtmg-button--primary tbtmg-button--large" data-tbtmg-new hidden><?php esc_html_e( 'Generate new game', 'tbt-matching-games' ); ?></button>
 		<span class="tbtmg-status" data-tbtmg-save-status role="status" aria-live="polite"></span>
 	</div>
 
