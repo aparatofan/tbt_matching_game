@@ -1,45 +1,12 @@
 /**
  * TBT Teaching Tools — front-end generator and library.
  *
- * Tokens are the canonical set from The Blue Tree Style Book v1.0 §12. They are
- * not derived from TBT Swipe: Swipe predates the book and still carries the
- * near-duplicate values the book supersedes.
- *
- * The defaults sit in a cascade layer so a site-wide tbt-tokens.css — or a
- * one-line snippet setting --tbt-blue on :root — always wins, while a page with
- * nothing but this plugin on it is still canonical on its own. The obvious
- * alternative, --tbt-blue: var(--tbt-blue, #0856C9), cannot do this: a custom
- * property referencing itself is a cycle, so it computes to guaranteed-invalid
- * and the fallback never applies.
+ * The design tokens this file consumes are NOT defined here. They come from the
+ * shared 'tbt-tokens' handle, which TBT-Hub owns and this plugin declares as a
+ * dependency, falling back to assets/vendor/tbt/tbt-tokens.css when Hub is
+ * inactive. See that directory's README.txt for why the tokens are a :root
+ * default inside a cascade layer rather than a self-referencing var() fallback.
  */
-
-@layer tbt-defaults {
-	:root {
-		--tbt-blue: #0856C9;
-		--tbt-blue-dark: #063F94;
-		--tbt-le: #660000;
-		--tbt-canvas: #F6F8FC;
-		--tbt-surface: #FFFFFF;
-		--tbt-input: #F0F5FE;
-		--tbt-selected-bg: #EDF4FF;
-		--tbt-border: #D8E3F0;
-		--tbt-ink: #1F2937;
-		--tbt-muted: #667085;
-		--tbt-success: #16803C;
-		--tbt-success-bg: #ECFDF3;
-		--tbt-error: #C62828;
-		--tbt-error-bg: #FFF1F1;
-		--tbt-radius-control: 12px;
-		--tbt-radius-card: 16px;
-		--tbt-radius-panel: 22px;
-		--tbt-shadow: 0 6px 20px rgba(24, 56, 96, .07);
-		--tbt-shadow-raised: 0 10px 28px rgba(8, 86, 201, .12);
-		--tbt-focus-ring: 0 0 0 3px rgba(8, 86, 201, .18);
-		--tbt-font-ui: "Roboto", sans-serif;
-		--tbt-font-content: "Roboto Slab", Georgia, serif;
-		--tbt-font-identity: "Roboto Mono", ui-monospace, monospace;
-	}
-}
 
 /*
  * tools.css only loads on a page that actually renders a tool shortcode, so

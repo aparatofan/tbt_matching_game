@@ -50,7 +50,13 @@ final class Assets {
 
 		// The teaching tools are a separate surface from the playable game and
 		// never load admin.css / admin.js, which are styled for wp-admin.
-		wp_register_style( 'tbtmg-tools', TBTMG_URL . 'assets/css/tools.css', array( 'tbtmg-fonts' ), TBTMG_VERSION );
+		//
+		// 'tbt-tokens' is a hard dependency so the shared vocabulary is always
+		// parsed before this sheet, whatever order WordPress prints in. The
+		// handle need not exist yet at registration time — WordPress resolves
+		// dependencies when it prints — but it must exist by then, which is
+		// what ensure_shared_styles() guarantees.
+		wp_register_style( 'tbtmg-tools', TBTMG_URL . 'assets/css/tools.css', array( 'tbtmg-fonts', 'tbt-tokens' ), TBTMG_VERSION );
 		wp_register_script( 'tbtmg-qrcode', TBTMG_URL . 'assets/js/lib/qrcode.min.js', array(), TBTMG_VERSION, true );
 		wp_register_script( 'tbtmg-tools', TBTMG_URL . 'assets/js/tools.js', array( 'tbtmg-qrcode' ), TBTMG_VERSION, true );
 	}
@@ -115,6 +121,7 @@ final class Assets {
 	 */
 	public function enqueue_tools( int $game_id = 0 ): void {
 		$this->register();
+		$this->ensure_shared_styles();
 		wp_enqueue_style( 'tbtmg-tools' );
 		wp_enqueue_script( 'tbtmg-tools' );
 
@@ -126,6 +133,51 @@ final class Assets {
 		if ( did_action( 'wp_head' ) && ! wp_style_is( 'tbtmg-tools', 'done' ) ) {
 			wp_print_styles( 'tbtmg-tools' );
 		}
+	}
+
+	/**
+	 * Guarantee that the canonical TBT-Hub token stylesheet is registered.
+	 *
+	 * TBT-Hub owns 'tbt-tokens' and registers it on wp_enqueue_scripts at
+	 * priority 5. If Hub is inactive we register the bundled fallback copy under
+	 * **the same handle**, so a later Hub activation replaces it wholesale and no
+	 * page can ever load two copies of the vocabulary under different handles.
+	 *
+	 * Deliberately called from enqueue_tools() rather than from register(), which
+	 * runs at priority 5 itself: at equal priority the winner is plugin load
+	 * order, so checking there could register the fallback in the very request
+	 * where Hub was about to provide the real thing. By the time anything
+	 * enqueues the tools bundle, Hub's priority-5 pass has certainly run.
+	 *
+	 * @return void
+	 */
+	private function ensure_shared_styles(): void {
+		if ( wp_style_is( 'tbt-tokens', 'registered' ) ) {
+			return;
+		}
+
+		wp_register_style(
+			'tbt-tokens',
+			TBTMG_URL . 'assets/vendor/tbt/tbt-tokens.css',
+			array(),
+			$this->asset_version( 'assets/vendor/tbt/tbt-tokens.css' )
+		);
+	}
+
+	/**
+	 * Cache-busting version for a bundled asset.
+	 *
+	 * The vendored token file changes when it is resynced with Hub, which need
+	 * not coincide with a TBTMG_VERSION bump, so its modification time is the
+	 * more reliable buster.
+	 *
+	 * @param string $relative_path Path relative to the plugin directory.
+	 * @return string
+	 */
+	private function asset_version( string $relative_path ): string {
+		$mtime = @filemtime( TBTMG_DIR . $relative_path );
+
+		return $mtime ? (string) $mtime : TBTMG_VERSION;
 	}
 
 	/**
