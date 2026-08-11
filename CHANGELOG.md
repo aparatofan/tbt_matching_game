@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.3 — 2026-08-11
+
+- The teaching tools now take their design tokens from TBT-Hub's shared
+  `tbt-tokens` stylesheet instead of defining a private copy inside
+  `tools.css`. The two were identical, so nothing changes on screen; what
+  changes is that a future edit to the shared palette reaches this plugin
+  instead of silently passing it by.
+- A bundled fallback copy in `assets/vendor/tbt/` keeps the tools rendering
+  correctly when TBT-Hub is inactive. It is registered under the shared handle
+  only when Hub has not already registered it, so a page carrying both a
+  matching game and another TBT tool still loads exactly one copy.
+
 ## 0.3.2 — 2026-08-07
 
 - The game library no longer renders a hero of its own. It normally shares a
