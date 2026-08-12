@@ -45,7 +45,9 @@ final class Assets {
 			array(),
 			null
 		);
-		wp_register_style( 'tbtmg-game', TBTMG_URL . 'assets/css/game.css', array( 'tbtmg-fonts' ), TBTMG_VERSION );
+		// 'tbt-tokens' is a hard dependency: game.css consumes the canonical
+		// vocabulary directly and no longer carries local --tbtmg-* copies.
+		wp_register_style( 'tbtmg-game', TBTMG_URL . 'assets/css/game.css', array( 'tbtmg-fonts', 'tbt-tokens' ), TBTMG_VERSION );
 		wp_register_script( 'tbtmg-game', TBTMG_URL . 'assets/js/game.js', array(), TBTMG_VERSION, true );
 
 		// The teaching tools are a separate surface from the playable game and
@@ -101,6 +103,7 @@ final class Assets {
 	 */
 	public function enqueue_game(): void {
 		$this->register();
+		$this->ensure_shared_styles();
 		wp_enqueue_style( 'tbtmg-game' );
 		wp_enqueue_script( 'tbtmg-game' );
 
@@ -143,11 +146,15 @@ final class Assets {
 	 * **the same handle**, so a later Hub activation replaces it wholesale and no
 	 * page can ever load two copies of the vocabulary under different handles.
 	 *
-	 * Deliberately called from enqueue_tools() rather than from register(), which
-	 * runs at priority 5 itself: at equal priority the winner is plugin load
-	 * order, so checking there could register the fallback in the very request
-	 * where Hub was about to provide the real thing. By the time anything
-	 * enqueues the tools bundle, Hub's priority-5 pass has certainly run.
+	 * Deliberately called from the enqueue_* methods rather than from register(),
+	 * which runs at priority 5 itself: at equal priority the winner is plugin
+	 * load order, so checking there could register the fallback in the very
+	 * request where Hub was about to provide the real thing.
+	 *
+	 * The earliest caller is enqueue_game() by way of maybe_enqueue_early(), on
+	 * wp_enqueue_scripts priority 20. That is still after Hub's priority-5 pass,
+	 * so the guard below sees Hub's registration whenever Hub is active and the
+	 * fallback is only ever reached when it genuinely is not.
 	 *
 	 * @return void
 	 */
