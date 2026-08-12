@@ -8,7 +8,12 @@ secrets.php
 
 # Dependencies / build noise (this plugin uses none, but guard anyway)
 node_modules/
-vendor/
+# Anchored to the repo root on purpose. An unanchored `vendor/` matches at any
+# depth, which silently swallowed assets/vendor/tbt/ — the bundled tbt-tokens.css
+# fallback was committed but never actually stored, leaving ensure_shared_styles()
+# registering a 404 whenever TBT-Hub was inactive. That directory is vendored
+# source we ship, not an installed dependency, so it must stay tracked.
+/vendor/
 *.log
 
 # OS / editor cruft

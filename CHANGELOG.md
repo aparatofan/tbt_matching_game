@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.3.4 — 2026-08-12
+
+- The playable game surface now takes its design tokens from TBT-Hub's shared
+  `tbt-tokens` stylesheet. `game.css` had been declaring twelve private
+  `--tbtmg-*` colour and elevation variables, which the shared vocabulary
+  forbids by name; eleven held values byte-identical to the canonical tokens,
+  so removing them changes nothing on screen. The twelfth, the raised shadow,
+  moves from a slate-grey tint at 8% to the canonical blue tint at 12% — the
+  hero and cards get a very slightly bluer, slightly stronger elevation, which
+  is the intended system behaviour and the only visible change in this release.
+- `tbt-tokens` is now a hard dependency of the game stylesheet, and
+  `enqueue_game()` registers the shared sheet the same way the tools path
+  already did. Without this the tokens would never be present on a page that
+  only renders a game.
+- Restored the bundled `assets/vendor/tbt/` fallback, which 0.3.3 intended to
+  ship but never actually stored: an unanchored `vendor/` pattern in
+  `.gitignore` matched it at any depth and silently dropped it from the
+  repository. With the file absent, the shared handle pointed at a URL that
+  404s whenever TBT-Hub was inactive, leaving the teaching tools unstyled. The
+  ignore rule is now anchored to the repository root.
+
 ## 0.3.3 — 2026-08-11
 
 - The teaching tools now take their design tokens from TBT-Hub's shared
