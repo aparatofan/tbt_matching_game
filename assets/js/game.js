@@ -13,8 +13,10 @@
 			this.connectionLayer = container.querySelector('[data-tbtmg-connections]');
 			this.matchedCount = container.querySelector('[data-tbtmg-matched]');
 			this.attemptCount = container.querySelector('[data-tbtmg-attempts]');
-			this.completion = container.querySelector('[data-tbtmg-completion]');
-			this.completionAttempts = container.querySelector('[data-tbtmg-completion-attempts]');
+			this.result = container.querySelector('[data-tbtmg-result]');
+			this.resultAttempts = container.querySelector('[data-tbtmg-result-attempts]');
+			this.resultTimers = [];
+			this.resultSequence = 0;
 			this.liveRegion = container.querySelector('[data-tbtmg-live]');
 			this.resetButton = container.querySelector('[data-tbtmg-reset]');
 			this.matchedIds = new Set();
@@ -39,6 +41,18 @@
 			document.addEventListener('keydown', (event) => {
 				if (event.key === 'Escape') {
 					this.cancelDrag();
+				}
+				if (
+					(event.key === 'Escape' || event.key === 'Enter') &&
+					this.result.classList.contains('is-visible')
+				) {
+					this.dismissResult(this.resultSequence);
+				}
+			});
+
+			this.result.addEventListener('click', () => {
+				if (this.result.classList.contains('is-visible')) {
+					this.dismissResult(this.resultSequence);
 				}
 			});
 
@@ -173,8 +187,10 @@
 			this.rightList.replaceChildren();
 			this.matchedIds = new Set();
 			this.attempts = 0;
-			this.completion.hidden = true;
-			this.completion.classList.remove('is-visible');
+			this.clearResultTimers();
+			this.resultSequence += 1;
+			this.result.classList.remove('is-visible', 'is-counting');
+			this.result.hidden = true;
 
 			const leftPairs = this.config.settings.shuffle_on_load ? this.shuffle(this.config.pairs) : [...this.config.pairs];
 			const rightPairs = this.config.settings.shuffle_on_load ? this.shuffle(this.config.pairs) : [...this.config.pairs];
@@ -309,16 +325,44 @@
 			}
 
 			if (this.matchedIds.size === this.config.pairs.length) {
-				const completeText = this.config.labels.complete.replace('%d', String(this.attempts));
-				this.completionAttempts.textContent = completeText;
-				this.completion.hidden = false;
-				this.completion.classList.add('is-visible');
-				this.announce(completeText);
-				this.completion.scrollIntoView({
-					behavior: this.reducedMotion ? 'auto' : 'smooth',
-					block: 'nearest'
-				});
+				this.showResult();
 			}
+		}
+
+		clearResultTimers() {
+			this.resultTimers.forEach((timerId) => window.clearTimeout(timerId));
+			this.resultTimers = [];
+		}
+
+		laterResult(fn, ms) {
+			this.resultTimers.push(window.setTimeout(fn, ms));
+		}
+
+		showResult() {
+			this.resultSequence += 1;
+			const seq = this.resultSequence;
+			const completeText = this.config.labels.complete.replace('%d', String(this.attempts));
+
+			this.resultAttempts.textContent = completeText;
+			this.result.hidden = false;
+			// The reflow is required: adding both in the same frame skips the fade-in.
+			void this.result.offsetWidth;
+			this.result.classList.add('is-visible');
+			this.laterResult(() => this.result.classList.add('is-counting'), 60);
+			this.announce(completeText);
+			this.laterResult(() => this.dismissResult(seq), 5060);
+		}
+
+		dismissResult(seq) {
+			if (seq !== this.resultSequence) {
+				return;
+			}
+
+			this.clearResultTimers();
+			this.result.classList.remove('is-visible', 'is-counting');
+			this.laterResult(() => {
+				this.result.hidden = true;
+			}, 320);
 		}
 
 		announce(message) {
