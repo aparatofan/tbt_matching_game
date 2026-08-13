@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.3.5 — 2026-08-13
+
+- Finishing a game now raises a result overlay over the board itself instead of
+  revealing a green panel underneath it. The old panel sat below the fold on a
+  tall game, so the game scrolled itself into view to show it, pulling the
+  finished board off screen at the exact moment the class wanted to look at it.
+  The overlay floats over the board, holds for five seconds with a draining
+  timer bar, and fades out on its own; a tap, click, `Enter` or `Escape`
+  dismisses it early. Matched cards are `disabled` by then, so the keyboard
+  route matters — without it the overlay would be a dead end.
+- The completion heading and message are still the per-game fields a teacher
+  edits; nothing about their defaults or their wording changed. The overlay
+  carries a `data-state="success"` hook so a second variant can be added later
+  without restructuring the markup.
+- The overlay blurs the board behind it. This is the only use of blur in the
+  TBT system and is a deliberate exception: the finished board stays legible
+  through the panel, which is the point of holding it on screen at all.
+- Removing the old panel also removes the last two hardcoded hex values in
+  `game.css`, `#166534` and `#3f6250`, which had survived the 0.3.4 token
+  sweep. Every colour in the new block comes from the shared vocabulary.
+
 ## 0.3.4 — 2026-08-12
 
 - The playable game surface now takes its design tokens from TBT-Hub's shared

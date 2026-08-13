@@ -304,39 +304,6 @@
 	animation: tbtmg-match-pop 0.42s ease;
 }
 
-.tbtmg-completion {
-	margin-top: 18px;
-	padding: 22px;
-	border: 1px solid rgba(22, 128, 60, 0.28);
-	border-radius: 18px;
-	background: var(--tbt-success-bg);
-	box-shadow: var(--tbt-shadow-raised);
-	text-align: center;
-}
-
-.tbtmg-completion[hidden] {
-	display: none;
-}
-
-.tbtmg-completion.is-visible {
-	animation: tbtmg-fade-in 0.4s ease;
-}
-
-.tbtmg-completion h3 {
-	margin: 0 0 5px;
-	color: #166534;
-}
-
-.tbtmg-completion p {
-	margin: 0;
-	color: #3f6250;
-}
-
-.tbtmg-completion-attempts {
-	margin-top: 7px !important;
-	font-weight: 700;
-}
-
 .tbtmg-sr-only {
 	position: absolute;
 	width: 1px;
@@ -392,11 +359,6 @@
 	to { stroke-dashoffset: 0; }
 }
 
-@keyframes tbtmg-fade-in {
-	from { opacity: 0; transform: translateY(8px); }
-	to { opacity: 1; transform: translateY(0); }
-}
-
 @media (max-width: 760px) {
 	.tbtmg-hero {
 		grid-template-columns: 1fr;
@@ -442,5 +404,141 @@
 		animation-iteration-count: 1 !important;
 		scroll-behavior: auto !important;
 		transition-duration: 0.01ms !important;
+	}
+}
+
+/**
+ * The result overlay.
+ *
+ * The backdrop-filter below is a deliberate, documented exception: it is the
+ * only use of blur in the TBT system, and it exists so the finished board stays
+ * readable behind the panel.
+ */
+
+.tbtmg-result {
+	position: absolute;
+	inset: 0;
+	z-index: 6;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--tbt-radius-panel);
+	background: rgba(246, 248, 252, 0.55);
+	-webkit-backdrop-filter: blur(10px) saturate(115%);
+	backdrop-filter: blur(10px) saturate(115%);
+	opacity: 0;
+	pointer-events: none;
+	cursor: pointer;
+	transition: opacity 0.3s ease;
+}
+
+.tbtmg-result[hidden] {
+	display: none;
+}
+
+.tbtmg-result.is-visible {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.tbtmg-result__panel {
+	position: relative;
+	min-width: 320px;
+	max-width: 440px;
+	padding: 36px 40px 30px;
+	text-align: center;
+	background: rgba(255, 255, 255, 0.78);
+	border: 1px solid rgba(216, 227, 240, 0.9);
+	border-radius: var(--tbt-radius-panel);
+	box-shadow: var(--tbt-shadow-raised);
+	opacity: 0;
+	transform: translateY(10px) scale(0.96);
+	transition: transform 0.34s cubic-bezier(0.22, 0.9, 0.34, 1), opacity 0.28s ease;
+}
+
+.tbtmg-result.is-visible .tbtmg-result__panel {
+	opacity: 1;
+	transform: none;
+}
+
+.tbtmg-result__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	height: 64px;
+	margin: 0 auto 20px;
+	border-radius: 50%;
+	background: var(--tbt-success-bg);
+	color: var(--tbt-success);
+}
+
+.tbtmg-result__icon svg {
+	width: 32px;
+	height: 32px;
+}
+
+.tbtmg-result__title {
+	margin: 0 0 10px;
+	font-family: var(--tbt-font-content);
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--tbt-success);
+}
+
+.tbtmg-result__message {
+	margin: 0;
+	font-family: var(--tbt-font-ui);
+	font-size: 16px;
+	line-height: 1.55;
+	color: var(--tbt-ink);
+}
+
+.tbtmg-result__attempts {
+	margin: 8px 0 0;
+	font-family: var(--tbt-font-ui);
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--tbt-ink);
+}
+
+.tbtmg-result__hint {
+	margin: 22px 0 0;
+	font-family: var(--tbt-font-ui);
+	font-size: 13px;
+	color: var(--tbt-muted);
+}
+
+.tbtmg-result__timer {
+	position: absolute;
+	right: 40px;
+	bottom: 18px;
+	left: 40px;
+	height: 3px;
+	overflow: hidden;
+	background: rgba(31, 41, 55, 0.1);
+	border-radius: 2px;
+}
+
+.tbtmg-result__timer i {
+	display: block;
+	height: 100%;
+	width: 100%;
+	border-radius: 2px;
+	transform-origin: left center;
+	background: var(--tbt-success);
+}
+
+.tbtmg-result.is-counting .tbtmg-result__timer i {
+	transform: scaleX(0);
+	transition: transform 5000ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.tbtmg-result,
+	.tbtmg-result__panel,
+	.tbtmg-result__timer i {
+		transition-duration: 1ms !important;
 	}
 }

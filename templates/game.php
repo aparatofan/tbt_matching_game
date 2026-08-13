@@ -81,12 +81,18 @@ if ( ! empty( $args['compact'] ) ) {
 			</div>
 			<div class="tbtmg-card-list" data-tbtmg-list="right"></div>
 		</div>
-	</section>
-
-	<section class="tbtmg-completion" data-tbtmg-completion hidden aria-live="polite">
-		<h3><?php echo esc_html( $data['completion_title'] ); ?></h3>
-		<p><?php echo esc_html( $data['completion_message'] ); ?></p>
-		<p class="tbtmg-completion-attempts" data-tbtmg-completion-attempts></p>
+		<div class="tbtmg-result" data-tbtmg-result data-state="success" hidden role="status" aria-live="polite">
+			<div class="tbtmg-result__panel">
+				<div class="tbtmg-result__icon" aria-hidden="true">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+				</div>
+				<h3 class="tbtmg-result__title"><?php echo esc_html( $data['completion_title'] ); ?></h3>
+				<p class="tbtmg-result__message"><?php echo esc_html( $data['completion_message'] ); ?></p>
+				<p class="tbtmg-result__attempts" data-tbtmg-result-attempts></p>
+				<p class="tbtmg-result__hint"><?php esc_html_e( 'Tap anywhere to continue', 'tbt-matching-games' ); ?></p>
+				<div class="tbtmg-result__timer" aria-hidden="true"><i></i></div>
+			</div>
+		</div>
 	</section>
 
 	<script type="application/json" class="tbtmg-game-data"><?php echo wp_json_encode( $config, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></script>
