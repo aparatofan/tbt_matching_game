@@ -363,6 +363,95 @@
 			this.laterResult(() => {
 				this.result.hidden = true;
 			}, 320);
+			this.laterResult(() => this.sortForReview(seq), 560);
+		}
+
+		/**
+		 * Move the cards into review order.
+		 *
+		 * Every lookup happens before the first move, so a board missing a card
+		 * leaves the order untouched instead of half sorted. 'append' on an
+		 * existing child moves it, which keeps the listeners bound in createCard().
+		 *
+		 * @param {Array} order Pairs in the order the rows should end up in.
+		 * @return {boolean} False when a card could not be found.
+		 */
+		applyReviewOrder(order) {
+			const moves = [];
+
+			for (const pair of order) {
+				const pairId = String(pair.id);
+				const leftCard = this.findCard(this.leftList, pairId);
+				const rightCard = this.findCard(this.rightList, pairId);
+				if (!leftCard || !rightCard) {
+					return false;
+				}
+				moves.push([leftCard, rightCard]);
+			}
+
+			moves.forEach(([leftCard, rightCard]) => {
+				this.leftList.append(leftCard);
+				this.rightList.append(rightCard);
+			});
+
+			return true;
+		}
+
+		sortForReview(seq) {
+			if (seq !== this.resultSequence) {
+				return;
+			}
+
+			// No explicit locale: the visitor's collation sorts the diacritics.
+			const order = [...this.config.pairs].sort((a, b) => a.left.localeCompare(b.left, undefined, { sensitivity: 'base' }));
+
+			if (this.reducedMotion) {
+				this.applyReviewOrder(order);
+				this.scheduleConnectionDraw();
+				return;
+			}
+
+			// The lines are positioned against the board and would stay pinned to
+			// the old card positions while the cards slide out from under them.
+			// animatedConnectionIds is deliberately left populated, so the lines
+			// do not replay their draw animation when they come back.
+			this.clearConnections();
+
+			const cards = [...this.leftList.children, ...this.rightList.children];
+			const firstRects = new Map();
+			cards.forEach((card) => firstRects.set(card, card.getBoundingClientRect()));
+
+			if (!this.applyReviewOrder(order)) {
+				this.scheduleConnectionDraw();
+				return;
+			}
+
+			cards.forEach((card) => {
+				const firstRect = firstRects.get(card);
+				const lastRect = card.getBoundingClientRect();
+				card.style.willChange = 'transform';
+				card.style.transition = 'none';
+				card.style.transform = `translate(${firstRect.left - lastRect.left}px, ${firstRect.top - lastRect.top}px)`;
+			});
+
+			// Without this the browser coalesces both transform writes and nothing animates.
+			void this.board.offsetWidth;
+
+			[this.leftList, this.rightList].forEach((list) => {
+				Array.from(list.children).forEach((card, rowIndex) => {
+					card.style.transition = `transform 620ms cubic-bezier(0.22, 0.61, 0.36, 1) ${rowIndex * 30}ms`;
+					card.style.transform = '';
+				});
+			});
+
+			this.laterResult(() => {
+				cards.forEach((card) => {
+					card.style.transition = '';
+					card.style.transform = '';
+					card.style.willChange = '';
+				});
+				this.scheduleConnectionDraw();
+			}, 620 + (order.length * 30) + 60);
 		}
 
 		announce(message) {

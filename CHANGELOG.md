@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.3.6 — 2026-08-13
+
+- When the result overlay clears, both columns slide into alphabetical order by
+  the left-hand term, so row *n* on the left is the partner of row *n* on the
+  right. A finished board used to keep the shuffle it was played in, which is
+  the one order nobody can read down; now it settles into a reference table a
+  teacher can walk through with the class.
+- The cards move rather than being rebuilt: each one is measured, appended into
+  its new place, then slid from where it was, with a 30ms stagger down the rows
+  so both columns cascade together. Rebuilding would have been simpler and would
+  have dropped every listener bound when the card was created.
+- Connections are cleared before the slide and drawn again after it. They are
+  positioned against the board, so left in place they would stay pinned where
+  the cards used to be. The record of which lines have already animated is
+  deliberately kept, so they reappear against the new positions instead of
+  replaying the draw for a match the learner made minutes ago.
+- Sorting uses the visitor's own collation rather than a hardcoded locale, so
+  Polish diacritics land where a Polish reader expects them.
+- Under `prefers-reduced-motion` the reorder still happens, without the slide.
+
 ## 0.3.5 — 2026-08-13
 
 - Finishing a game now raises a result overlay over the board itself instead of
