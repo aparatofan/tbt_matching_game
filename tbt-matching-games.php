@@ -3,7 +3,7 @@
  * Plugin Name:       TBT Matching Games
  * Plugin URI:        https://github.com/aparatofan/tbt_matching_game
  * Description:       Create, edit, publish, and embed AI-assisted matching games.
- * Version:           0.3.6
+ * Version:           0.3.7
  * Requires at least: 6.4
  * Requires PHP:      8.0
  * Author:            Mariusz Mirecki
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'TBTMG_VERSION', '0.3.6' );
+define( 'TBTMG_VERSION', '0.3.7' );
 define( 'TBTMG_FILE', __FILE__ );
 define( 'TBTMG_DIR', plugin_dir_path( __FILE__ ) );
 define( 'TBTMG_URL', plugin_dir_url( __FILE__ ) );
@@ -57,7 +57,7 @@ function register_hub_item( $items ) {
 	$items[] = array(
 		'slug'        => 'tbt-matching-games',
 		'title'       => 'TBT Matching Games',
-		'description' => 'AI-assisted matching games for live lessons; teachers build them on the front end and students play from a link or QR code.',
+		'description' => 'AI-assisted matching games for live lessons; teachers build them on the front end and students play from a link.',
 		'capability'  => Access::CAPABILITY,
 	);
 

@@ -158,9 +158,8 @@
 	}
 
 	/**
-	 * Share panel: link, QR and shortcode. The QR renders as the panel is
-	 * built, never behind a second click — students scan it off a projected
-	 * screen mid-lesson.
+	 * Share panel: game link and lesson shortcode. Built when the panel is
+	 * expanded.
 	 */
 	function buildShare(game) {
 		var panel = el('div', 'tbtmg-share__inner');
@@ -171,21 +170,6 @@
 		}
 
 		panel.append(copyRow(t('gameLink'), game.permalink));
-
-		var qrWrap = el('div', 'tbtmg-qr');
-		var qrTarget = el('div', 'tbtmg-qr__code');
-		qrWrap.append(qrTarget, el('p', 'tbtmg-qr__caption', t('scanToPlay')));
-		panel.append(qrWrap);
-
-		if (typeof window.QRCode !== 'undefined') {
-			new window.QRCode(qrTarget, {
-				text: game.permalink,
-				width: 190,
-				height: 190,
-				correctLevel: window.QRCode.CorrectLevel.M
-			});
-		}
-
 		panel.append(copyRow(t('shortcodeLabel'), game.shortcode));
 
 		return panel;
@@ -580,8 +564,7 @@
 			shareButton.addEventListener('click', function () {
 				var opening = share.hidden;
 				if (opening) {
-					// Built on expand so the QR is on screen the moment the
-					// panel is, with no second click.
+					// Built lazily on first expand.
 					share.replaceChildren(buildShare(game));
 				}
 				share.hidden = !opening;
