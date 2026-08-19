@@ -59,8 +59,7 @@ final class Assets {
 		// dependencies when it prints — but it must exist by then, which is
 		// what ensure_shared_styles() guarantees.
 		wp_register_style( 'tbtmg-tools', TBTMG_URL . 'assets/css/tools.css', array( 'tbtmg-fonts', 'tbt-tokens' ), TBTMG_VERSION );
-		wp_register_script( 'tbtmg-qrcode', TBTMG_URL . 'assets/js/lib/qrcode.min.js', array(), TBTMG_VERSION, true );
-		wp_register_script( 'tbtmg-tools', TBTMG_URL . 'assets/js/tools.js', array( 'tbtmg-qrcode' ), TBTMG_VERSION, true );
+		wp_register_script( 'tbtmg-tools', TBTMG_URL . 'assets/js/tools.js', array(), TBTMG_VERSION, true );
 	}
 
 	/**
@@ -229,7 +228,6 @@ final class Assets {
 				'copied'          => __( 'Copied', 'tbt-matching-games' ),
 				'gameLink'        => __( 'Game link', 'tbt-matching-games' ),
 				'shortcodeLabel'  => __( 'Shortcode for a lesson page', 'tbt-matching-games' ),
-				'scanToPlay'      => __( 'Students scan this to play', 'tbt-matching-games' ),
 				'draftNoShare'    => __( 'This game is a draft, so it has no public link yet. Complete the pairs and save to publish it.', 'tbt-matching-games' ),
 				'pairCount'       => __( '%1$d of %2$d–%3$d pairs', 'tbt-matching-games' ),
 				'pairsIncomplete' => __( 'Fill in both sides of every pair.', 'tbt-matching-games' ),

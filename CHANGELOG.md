@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.7 — 2026-08-20
+
+- The share panel no longer shows a QR code. The game is desktop-only, so a code
+  meant to be scanned with a phone pointed students at a surface the game does
+  not run on. The panel now offers just the two things that work on a desktop:
+  the game link and the lesson shortcode.
+- Removed the vendored QRCode library and its script registration, since nothing
+  loads it any more, along with the now-unused "Students scan this to play"
+  string and the matching CSS.
+
 ## 0.3.6 — 2026-08-13
 
 - When the result overlay clears, both columns slide into alphabetical order by
