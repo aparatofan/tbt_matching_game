@@ -12,6 +12,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class Game_Validator {
+	/**
+	 * Hero copy limits.
+	 *
+	 * The player hero holds its title inside the blue part of a blue-to-white
+	 * gradient. Past these lengths the copy runs into the pale end and stops
+	 * being readable, so the limit is a layout constraint rather than a
+	 * database one. Mirrored in templates/generator.php, class-admin.php and
+	 * the generation schema in class-openai-client.php.
+	 */
+	public const TITLE_MAX   = 30;
+	public const EYEBROW_MAX = 60;
+
 	public const MIN_PAIRS = 4;
 	public const MAX_PAIRS = 12;
 
@@ -40,7 +52,7 @@ final class Game_Validator {
 	 * @return array|\WP_Error
 	 */
 	public function validate( array $raw, ?int $expected_count = null ) {
-		$title = $this->clean_text( $raw['title'] ?? '', 200 );
+		$title = $this->clean_text( $raw['title'] ?? '', self::TITLE_MAX );
 		if ( '' === $title ) {
 			return new \WP_Error( 'tbtmg_missing_title', __( 'The game title cannot be empty.', 'tbt-matching-games' ) );
 		}
@@ -145,7 +157,7 @@ final class Game_Validator {
 	 */
 	public function sanitise( array $raw ): array {
 		$defaults = Game_Repository::default_data();
-		$title    = $this->clean_text( $raw['title'] ?? '', 200 );
+		$title    = $this->clean_text( $raw['title'] ?? '', self::TITLE_MAX );
 		$topic    = $this->clean_textarea( $raw['topic'] ?? '', 500 );
 		$pairs    = isset( $raw['pairs'] ) && is_array( $raw['pairs'] ) ? array_values( $raw['pairs'] ) : array();
 
@@ -189,7 +201,7 @@ final class Game_Validator {
 			'schema_version'    => 1,
 			'title'             => $title,
 			'topic'             => $topic,
-			'eyebrow'           => $this->clean_text( $raw['eyebrow'] ?? $defaults['eyebrow'], 100 ),
+			'eyebrow'           => $this->clean_text( $raw['eyebrow'] ?? $defaults['eyebrow'], self::EYEBROW_MAX ),
 			'instructions'      => $this->clean_textarea( $raw['instructions'] ?? $defaults['instructions'], 1000 ),
 			'left_column_title' => $this->clean_text( $raw['left_column_title'] ?? $defaults['left_column_title'], 100 ),
 			'right_column_title'=> $this->clean_text( $raw['right_column_title'] ?? $defaults['right_column_title'], 100 ),

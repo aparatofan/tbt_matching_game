@@ -223,8 +223,8 @@ PROMPT;
 				'pairs',
 			),
 			'properties'           => array(
-				'title'              => array( 'type' => 'string' ),
-				'eyebrow'            => array( 'type' => 'string' ),
+				'title'              => array( 'type' => 'string', 'maxLength' => Game_Validator::TITLE_MAX ),
+				'eyebrow'            => array( 'type' => 'string', 'maxLength' => Game_Validator::EYEBROW_MAX ),
 				'instructions'       => array( 'type' => 'string' ),
 				'left_column_title'  => array( 'type' => 'string' ),
 				'right_column_title' => array( 'type' => 'string' ),

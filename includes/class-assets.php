@@ -106,6 +106,22 @@ final class Assets {
 		wp_enqueue_style( 'tbtmg-game' );
 		wp_enqueue_script( 'tbtmg-game' );
 
+		/*
+		 * The tree mark's stylesheet is Hub's, under the handle 'tbt-tree'. It is
+		 * enqueued here rather than left to the shortcode because the shortcode
+		 * runs during template render, after wp_head has printed: the stylesheet
+		 * would then land in the footer and the leaves, which take their fill
+		 * from that file, would flash black first.
+		 *
+		 * It is deliberately NOT declared as a dependency of 'tbtmg-game'. An
+		 * unregistered dependency makes WordPress skip the dependent stylesheet
+		 * entirely, so a deactivated Hub would take the whole game surface down
+		 * rather than just the mark.
+		 */
+		if ( wp_style_is( 'tbt-tree', 'registered' ) ) {
+			wp_enqueue_style( 'tbt-tree' );
+		}
+
 		// Shortcodes inserted by page builders may be discovered after wp_head.
 		if ( did_action( 'wp_head' ) && ! wp_style_is( 'tbtmg-game', 'done' ) ) {
 			wp_print_styles( 'tbtmg-game' );

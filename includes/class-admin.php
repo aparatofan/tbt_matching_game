@@ -183,7 +183,7 @@ final class Admin {
 		?>
 		<div class="tbtmg-details-grid">
 			<?php $this->textarea_field( 'topic', __( 'Topic', 'tbt-matching-games' ), $data['topic'], 3, 500 ); ?>
-			<?php $this->text_field( 'eyebrow', __( 'Eyebrow / category label', 'tbt-matching-games' ), $data['eyebrow'], 100 ); ?>
+			<?php $this->text_field( 'eyebrow', __( 'Eyebrow / category label', 'tbt-matching-games' ), $data['eyebrow'], Game_Validator::EYEBROW_MAX ); ?>
 			<?php $this->textarea_field( 'instructions', __( 'Student instructions', 'tbt-matching-games' ), $data['instructions'], 4, 1000 ); ?>
 			<?php $this->text_field( 'left_column_title', __( 'Left-column title', 'tbt-matching-games' ), $data['left_column_title'], 100 ); ?>
 			<?php $this->text_field( 'right_column_title', __( 'Right-column title', 'tbt-matching-games' ), $data['right_column_title'], 100 ); ?>

@@ -59,7 +59,7 @@ $tbtmg_stage = 0;
 					type="text"
 					id="<?php echo esc_attr( $tbtmg_uid ); ?>-title"
 					data-tbtmg-field="title"
-					maxlength="200"
+					maxlength="<?php echo esc_attr( (string) Game_Validator::TITLE_MAX ); ?>"
 					placeholder="<?php esc_attr_e( 'Example: Reporting verbs — B2', 'tbt-matching-games' ); ?>"
 					value="<?php echo esc_attr( $game_id ? $data['title'] : '' ); ?>"
 				>
@@ -118,7 +118,7 @@ $tbtmg_stage = 0;
 						type="text"
 						id="<?php echo esc_attr( $tbtmg_uid ); ?>-title"
 						data-tbtmg-field="title"
-						maxlength="200"
+						maxlength="<?php echo esc_attr( (string) Game_Validator::TITLE_MAX ); ?>"
 						placeholder="<?php esc_attr_e( 'Example: Reporting verbs — B2', 'tbt-matching-games' ); ?>"
 						value="<?php echo esc_attr( $game_id ? $data['title'] : '' ); ?>"
 					>
@@ -127,7 +127,7 @@ $tbtmg_stage = 0;
 			<?php
 			$tbtmg_fields = array(
 				'topic'              => array( __( 'Topic', 'tbt-matching-games' ), 'textarea', 500 ),
-				'eyebrow'            => array( __( 'Eyebrow / category label', 'tbt-matching-games' ), 'text', 100 ),
+				'eyebrow'            => array( __( 'Eyebrow / category label', 'tbt-matching-games' ), 'text', Game_Validator::EYEBROW_MAX ),
 				'instructions'       => array( __( 'Student instructions', 'tbt-matching-games' ), 'textarea', 1000 ),
 				'left_column_title'  => array( __( 'Left-column title', 'tbt-matching-games' ), 'text', 100 ),
 				'right_column_title' => array( __( 'Right-column title', 'tbt-matching-games' ), 'text', 100 ),

@@ -14,7 +14,10 @@
 
 .tbtmg-game {
 	box-sizing: border-box;
-	width: min(1180px, 100%);
+	/* 1600 cap with a 32px gutter each side. The hero gradient is measured in
+	   percentages of this shell, so the type below is sized in vw to match —
+	   see .tbtmg-title and .tbtmg-subtitle. */
+	width: min(1600px, 100% - 64px);
 	margin: 1.5rem auto;
 	color: var(--tbt-ink);
 	font-family: "Roboto Slab", Georgia, serif;
@@ -33,14 +36,29 @@
 	gap: clamp(20px, 4vw, 52px);
 	margin-bottom: 18px;
 	padding: 26px 28px;
-	border-radius: 22px;
-	background: linear-gradient(135deg, var(--tbt-blue), var(--tbt-blue-dark));
+	border-radius: 20px;
+	/* Blue holds to 65%, white by 95%. The mark sits in the pale end, where the
+	   leaves land on TBT blue at the end of their bloom. Every piece of copy is
+	   sized to stay left of the 65% mark — see the note on .tbtmg-game. */
+	background: linear-gradient(
+		92deg,
+		var(--tbt-blue) 0%,
+		var(--tbt-blue) 65%,
+		#FFFFFF 95%
+	);
 	box-shadow: var(--tbt-shadow-raised);
 	color: #fff;
+	overflow: hidden;
 }
 
 .tbtmg-hero__content {
 	min-width: 0;
+}
+
+/* Hub's [tbt_tree] sets its own inline width; this is the PNG fallback and a
+   floor for the host if the shortcode is ever called without one. */
+.tbtmg-hero .tbt-tree-host {
+	justify-self: end;
 }
 
 .tbtmg-hero__logo {
@@ -54,27 +72,34 @@
 .tbtmg-eyebrow {
 	margin: 0 0 6px;
 	font-size: 0.78rem;
-	font-weight: 800;
+	font-weight: 700;
 	letter-spacing: 0.12em;
 	text-transform: uppercase;
-	opacity: 0.82;
+	color: #CECECE;
 }
 
 .tbtmg-title {
 	margin: 0;
 	color: inherit;
 	font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
-	font-size: clamp(1.75rem, 4vw, 2.75rem);
-	font-weight: 700;
-	line-height: 1.08;
+	/* vw, not rem: the gradient stop is a percentage of the shell, so a title
+	   with a pixel ceiling would drift across it as the screen changes. The
+	   40px cap lands exactly where the 1600px shell cap does. */
+	font-size: clamp(26px, 2.4vw, 40px);
+	font-weight: 500;
+	line-height: 1.1;
+	text-transform: uppercase;
 }
 
 .tbtmg-subtitle {
-	max-width: 780px;
-	margin: 10px 0 0;
+	/* Same reasoning as the title. The 830px cap keeps the line clear of the
+	   fade once the shell stops growing. White, not dimmed: this is the line
+	   that tells a student how to play. */
+	max-width: min(52vw, 830px);
+	margin: 12px 0 0;
 	font-size: 1rem;
 	line-height: 1.55;
-	opacity: 0.94;
+	color: #FFFFFF;
 }
 
 .tbtmg-toolbar {
@@ -141,7 +166,7 @@
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	align-items: start;
-	gap: clamp(72px, 8vw, 108px);
+	gap: clamp(72px, 8vw, 130px);
 	isolation: isolate;
 }
 
@@ -324,11 +349,11 @@
 
 .tbtmg-standalone {
 	width: 100%;
-	padding: 1rem;
+	padding: 1rem 0;   /* the gutter belongs to .tbtmg-game, not to two places */
 }
 
 .tbtmg-standalone__inner {
-	width: min(1180px, 100%);
+	width: 100%;
 	margin: 0 auto;
 }
 
@@ -372,6 +397,21 @@
 		justify-self: start;
 		width: 128px;
 		max-height: 60px;
+	}
+
+	/* Stacked, the hero is too short for the gradient to resolve, so it goes
+	   solid — and a mark that settles into blue would vanish on it. Retuning
+	   Hub's two stops is enough; no second copy of the tree is needed. */
+	.tbtmg-hero {
+		background: linear-gradient(160deg, var(--tbt-blue), var(--tbt-blue-dark));
+	}
+
+	.tbtmg-hero .tbt-tree-host {
+		grid-row: 1;
+		justify-self: start;
+		width: 128px;
+		--tbt-tree-leaf-mid: #9FC0EC;
+		--tbt-tree-leaf-final: #FFFFFF;
 	}
 
 	.tbtmg-toolbar {
