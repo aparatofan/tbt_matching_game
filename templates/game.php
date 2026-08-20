@@ -35,13 +35,28 @@ if ( ! empty( $args['compact'] ) ) {
 					<p class="tbtmg-subtitle" id="<?php echo esc_attr( $instance_id ); ?>-instructions"><?php echo esc_html( $data['instructions'] ); ?></p>
 				<?php endif; ?>
 			</div>
-			<img
-				class="tbtmg-hero__logo"
-				src="https://thebluetree.pl/wp-content/uploads/2020/12/TBT-white-logo.png"
-				alt="<?php esc_attr_e( 'The Blue Tree', 'tbt-matching-games' ); ?>"
-				loading="lazy"
-				decoding="async"
-			>
+			<?php
+			/*
+			 * The mark comes from TBT Hub's [tbt_tree] shortcode, which inlines the
+			 * SVG so its leaves can animate individually. Hub is not a hard
+			 * dependency: if it is inactive the shortcode does not exist and the
+			 * player falls back to the flat white PNG it used before, so a game
+			 * page never renders without a mark.
+			 *
+			 * Embedded games do not bloom. A lesson page has its own reading
+			 * order and a tree unfurling inside it competes with the lesson.
+			 */
+			if ( shortcode_exists( 'tbt_tree' ) ) {
+				$tbtmg_animate = empty( $args['compact'] ) ? 'yes' : 'no';
+				echo do_shortcode( sprintf( '[tbt_tree width="190px" animate="%s"]', esc_attr( $tbtmg_animate ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			} else {
+				printf(
+					'<img class="tbtmg-hero__logo" src="%1$s" alt="%2$s" loading="lazy" decoding="async">',
+					esc_url( 'https://thebluetree.pl/wp-content/uploads/2020/12/TBT-white-logo.png' ),
+					esc_attr__( 'The Blue Tree', 'tbt-matching-games' )
+				);
+			}
+			?>
 		</header>
 	<?php endif; ?>
 
