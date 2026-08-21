@@ -233,6 +233,8 @@ final class Assets {
 				'emptySearch'     => __( 'No games match that search.', 'tbt-matching-games' ),
 				'published'       => __( 'Published', 'tbt-matching-games' ),
 				'draft'           => __( 'Draft', 'tbt-matching-games' ),
+				'open'            => __( 'Open', 'tbt-matching-games' ),
+				'openNewTab'      => __( 'Open %s in a new tab', 'tbt-matching-games' ),
 				'edit'            => __( 'Edit', 'tbt-matching-games' ),
 				'share'           => __( 'Share', 'tbt-matching-games' ),
 				'duplicate'       => __( 'Duplicate', 'tbt-matching-games' ),

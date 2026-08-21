@@ -88,13 +88,35 @@ add_filter(
 1. Open **Matching Games → Add New**.
 2. Enter a topic.
 3. Choose 4–12 pairs.
-4. Add optional instructions about language, level, or pair structure.
-5. Select **Generate game**.
-6. Review and edit every field.
-7. Save as a draft or publish.
-8. Copy the generated shortcode or use the standalone permalink.
+4. Choose the language level.
+5. Add optional instructions about pair structure or anything else the topic
+   does not cover.
+6. Select **Generate game**.
+7. Review and edit every field.
+8. Save as a draft or publish.
+9. Copy the generated shortcode or use the standalone permalink.
 
 Generation never publishes automatically.
+
+### The language level
+
+Stage 1 of the front-end generator offers six CEFR bands — A1, A2, B1, B2, C1
+and C2 — as a row of tiles between the pair count and the additional
+instructions. Each band is more than a label: it sets a vocabulary and grammar
+ceiling, an item-length range, what the pairing is meant to test, and the kind
+of subject matter that belongs at that level, and those rules are sent to the
+model rather than the bare band name.
+
+The picker opens on the last band the teacher generated at, or B1 on a first
+run. Only a successful generation updates that memory, so a failed API call
+never moves it. A saved game records the band it was generated at and reopens on
+it when the game is edited; games saved before this feature existed record no
+band and fall back to the teacher's own default.
+
+The level shapes the language the model writes, never the teacher's own request:
+when the topic or the additional instructions name specific target items, those
+items are kept exactly as given and the band shapes only the material written
+around them.
 
 ## Shortcode
 
@@ -199,7 +221,7 @@ are scoped to the games the current user owns. An administrator may pass `author
 
 | Method | Route | Purpose |
 |---|---|---|
-| POST | `/generate` | Generate content without saving it |
+| POST | `/generate` | Generate content without saving it (`topic`, `pair_count`, `additional_instructions`, `level`) |
 | GET | `/games` | List own games (`search`, `page`, `per_page`, `status`) |
 | POST | `/games` | Create |
 | GET | `/games/{id}` | Read one |
@@ -243,7 +265,7 @@ The plugin fallback template remains available when no override exists.
 
 ## Actions
 
-- `tbt_matching_games_before_generate`
+- `tbt_matching_games_before_generate` — `( string $topic, int $pair_count, string $additional_instructions, int $user_id, string $level )`
 - `tbt_matching_games_after_generate`
 - `tbt_matching_games_before_render`
 - `tbt_matching_games_after_render`

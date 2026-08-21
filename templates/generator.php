@@ -21,6 +21,19 @@ $tbtmg_uid = 'tbtmg-gen-' . wp_unique_id();
  * The game title belongs to whichever stage comes first, for the same reason.
  */
 $tbtmg_stage = 0;
+
+/*
+ * An existing game opens on the level it was generated at; a new one opens on
+ * the last band this teacher used, or B1. A game saved before this release has
+ * no stored level, which is why normalise() is used rather than sanitize(): an
+ * empty value must fall through to the teacher's own default, not silently
+ * become B1.
+ */
+$tbtmg_level_initial = Levels::normalise( $data['level'] ?? '' );
+if ( '' === $tbtmg_level_initial ) {
+	$tbtmg_level_initial = Levels::initial_band( get_current_user_id() );
+}
+$tbtmg_level_names = Levels::band_names();
 ?>
 <div class="tbt tbt-tool tbtmg-tool tbtmg-generator" data-tbtmg-tool="generator" data-tbtmg-game-id="<?php echo esc_attr( (string) $game_id ); ?>">
 
@@ -80,6 +93,31 @@ $tbtmg_stage = 0;
 					<?php endfor; ?>
 				</select>
 			</div>
+			<?php
+			/*
+			 * Real radios, visually hidden and wrapped in labels: arrow-key
+			 * navigation, the roving tab stop and the reading order come from
+			 * the browser rather than from JS. Divs with click handlers would
+			 * look identical and be unreachable from a keyboard.
+			 */
+			?>
+			<fieldset class="tbtmg-levels" data-tbtmg-levels>
+				<legend class="tbtmg-levels__legend"><?php esc_html_e( 'Choose the language level.', 'tbt-matching-games' ); ?></legend>
+				<div class="tbtmg-levels__grid">
+					<?php foreach ( $tbtmg_level_names as $tbtmg_band => $tbtmg_band_name ) : ?>
+						<label class="tbtmg-level">
+							<input type="radio" class="tbtmg-level__input"
+								name="<?php echo esc_attr( $tbtmg_uid ); ?>-level"
+								value="<?php echo esc_attr( $tbtmg_band ); ?>"
+								<?php checked( $tbtmg_band, $tbtmg_level_initial ); ?>>
+							<span class="tbtmg-level__box">
+								<span class="tbtmg-level__code"><?php echo esc_html( $tbtmg_band ); ?></span>
+								<span class="tbtmg-level__name"><?php echo esc_html( $tbtmg_band_name ); ?></span>
+							</span>
+						</label>
+					<?php endforeach; ?>
+				</div>
+			</fieldset>
 			<div class="tbtmg-field">
 				<label for="<?php echo esc_attr( $tbtmg_uid ); ?>-instructions"><?php esc_html_e( 'Additional instructions', 'tbt-matching-games' ); ?></label>
 				<textarea id="<?php echo esc_attr( $tbtmg_uid ); ?>-instructions" data-tbtmg-generator="instructions" rows="3" maxlength="1500" placeholder="<?php esc_attr_e( 'Example: Left side: direct speech. Right side: reported speech. British English.', 'tbt-matching-games' ); ?>"></textarea>
@@ -123,6 +161,14 @@ $tbtmg_stage = 0;
 						value="<?php echo esc_attr( $game_id ? $data['title'] : '' ); ?>"
 					>
 				</div>
+				<?php
+				/*
+				 * Without the picker there is nothing for currentLevel() to read,
+				 * so a teacher who cannot generate would wipe the stored level
+				 * simply by saving. This carries it back unchanged.
+				 */
+				?>
+				<input type="hidden" data-tbtmg-field="level" value="<?php echo esc_attr( Levels::normalise( $data['level'] ?? '' ) ); ?>">
 			<?php endif; ?>
 			<?php
 			$tbtmg_fields = array(

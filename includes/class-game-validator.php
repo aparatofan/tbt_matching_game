@@ -201,6 +201,9 @@ final class Game_Validator {
 			'schema_version'    => 1,
 			'title'             => $title,
 			'topic'             => $topic,
+			// normalise(), not sanitize(): a game that genuinely has no recorded
+			// level must keep saying so rather than claiming it was made at B1.
+			'level'             => Levels::normalise( $raw['level'] ?? '' ),
 			'eyebrow'           => $this->clean_text( $raw['eyebrow'] ?? $defaults['eyebrow'], self::EYEBROW_MAX ),
 			'instructions'      => $this->clean_textarea( $raw['instructions'] ?? $defaults['instructions'], 1000 ),
 			'left_column_title' => $this->clean_text( $raw['left_column_title'] ?? $defaults['left_column_title'], 100 ),

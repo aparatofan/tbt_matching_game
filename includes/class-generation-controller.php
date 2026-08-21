@@ -89,6 +89,18 @@ final class Generation_Controller {
 							return $length <= 1500;
 						},
 					),
+					/*
+					 * Deliberately not validated: an unrecognised band falls back
+					 * to the default in the handler rather than returning a 422.
+					 * Losing a generation to a typo in a field the teacher did not
+					 * type is not a trade worth making.
+					 */
+					'level'                   => array(
+						'required'          => false,
+						'default'           => '',
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 			)
 		);
@@ -126,9 +138,10 @@ final class Generation_Controller {
 		$topic       = (string) $request->get_param( 'topic' );
 		$pair_count  = absint( $request->get_param( 'pair_count' ) );
 		$instructions = (string) $request->get_param( 'additional_instructions' );
+		$level        = Levels::sanitize( $request->get_param( 'level' ) );
 
-		do_action( 'tbt_matching_games_before_generate', $topic, $pair_count, $instructions, get_current_user_id() );
-		$result = $this->openai->generate( $topic, $pair_count, $instructions );
+		do_action( 'tbt_matching_games_before_generate', $topic, $pair_count, $instructions, get_current_user_id(), $level );
+		$result = $this->openai->generate( $topic, $pair_count, $instructions, $level );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
@@ -151,6 +164,11 @@ final class Generation_Controller {
 		// Only a successful generation consumes quota: a failed API call is not
 		// the teacher's fault and must not cost them a lesson's worth of tries.
 		self::record_generation( get_current_user_id() );
+
+		// Same placement rule as the counter: only a successful generation
+		// updates the remembered band, so a failed API call never changes what
+		// the picker opens on next time.
+		Levels::remember( get_current_user_id(), $level );
 
 		return new \WP_REST_Response(
 			array(

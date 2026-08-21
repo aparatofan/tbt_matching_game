@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.5.0 — 2026-08-21
+
+- Stage 1 now asks how hard the language should be. Six CEFR tiles, A1 to C2,
+  sit between the pair count and the additional instructions. Until now the only
+  way to ask for a difficulty was to write "B2" into the topic field, and a bare
+  band label means whatever the model last read it to mean, so the same topic
+  came back at wildly different levels from one generation to the next.
+- Each band carries concrete rules rather than a label: a vocabulary and grammar
+  ceiling, an item-length range, what the pairing is meant to test, and the kind
+  of subject matter that belongs at that level. The topic range matters as much
+  as the grammar — when only the grammar moves, two adjacent bands come out
+  indistinguishable. The rules go to the model as a tagged <LEVEL> section, and
+  the developer prompt now says plainly that the band is a constraint on the
+  model's own writing, never something to mention to a student.
+- The level never overrides a teacher's own request. When the topic or the
+  additional instructions name specific target items, those items are kept
+  exactly as given and the band shapes only the definitions and contexts written
+  around them. And the one-correct-partner rule outranks the whole level
+  section: at C1 and C2 the instruction to draw fine distinctions pulls directly
+  against the ban on ambiguous matches, and ambiguity is the one defect a
+  matching game cannot survive.
+- The picker opens where a teacher left it. A successful generation records the
+  band against the user, the same way the generation counter is recorded, so a
+  failed API call never moves it. A saved game records the band it was generated
+  at and reopens on it for editing. Games saved before this release record no
+  band at all and keep saying so rather than claiming they were made at B1.
+- The picker is a group of real radios, hidden from sight but not from the
+  keyboard, so arrow-key navigation and the single tab stop come from the
+  browser rather than from script, and the focus ring lands on the tile a
+  teacher can actually see.
+- Library rows lead with Open. Looking at a game before a lesson is the thing
+  teachers do most often, and it used to take three actions — expand Share, find
+  the link, click it. Open appears on published games only, because a draft
+  permalink 404s for teacher and student alike.
+
 ## 0.3.7 — 2026-08-20
 
 - The share panel no longer shows a QR code. The game is desktop-only, so a code

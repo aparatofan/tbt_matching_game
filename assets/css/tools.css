@@ -375,6 +375,117 @@ body {
 	font-size: 14px;
 }
 
+/* ---------- CEFR level picker ----------
+   The selected-tile surface is a local decision: the shared token file has no
+   opinion about one, and minting --tbt-* names for a single component is how a
+   shared vocabulary stops meaning anything. */
+.tbtmg-levels {
+	/* A fieldset carries a border, a legend inset and a min-width the theme is
+	   free to restyle; none of it survives here. */
+	display: block;
+	min-width: 0;
+	margin: 0 0 24px;
+	padding: 0;
+	border: 0;
+}
+
+.tbtmg-levels__legend {
+	display: block;
+	float: none;
+	width: auto;
+	margin-bottom: 8px;
+	padding: 0;
+	color: var(--tbt-ink);
+	font-family: var(--tbt-font-ui);
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.tbtmg-levels__grid {
+	display: grid;
+	grid-template-columns: repeat(6, minmax(0, 1fr));
+	gap: 8px;
+	max-width: 640px;
+}
+
+.tbtmg-level {
+	display: block;
+	margin: 0;
+	cursor: pointer;
+}
+
+/* Hidden from sight, not from the keyboard: display:none or visibility:hidden
+   would take the radio out of the tab order and the arrow-key group with it. */
+.tbtmg-level__input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	clip-path: inset(50%);
+}
+
+.tbtmg-level__input:focus-visible {
+	outline: none;
+}
+
+.tbtmg-level__box {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	min-height: 60px;
+	padding: 12px 8px;
+	border: 1.5px solid var(--tbt-border);
+	border-radius: var(--tbt-radius-control);
+	background: var(--tbt-surface);
+	text-align: center;
+	transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease, color .16s ease;
+}
+
+.tbtmg-level__code {
+	color: var(--tbt-ink);
+	font-family: var(--tbt-font-ui);
+	font-size: 16px;
+	font-weight: 700;
+	line-height: 1.1;
+}
+
+.tbtmg-level__name {
+	color: var(--tbt-muted);
+	font-family: var(--tbt-font-ui);
+	font-size: 11px;
+	line-height: 1.25;
+}
+
+.tbtmg-level:hover .tbtmg-level__box {
+	border-color: var(--tbt-blue);
+}
+
+.tbtmg-level__input:checked + .tbtmg-level__box {
+	border-color: var(--tbt-blue);
+	background: var(--tbt-selected-bg);
+}
+
+.tbtmg-level__input:checked + .tbtmg-level__box .tbtmg-level__code {
+	color: var(--tbt-blue-dark);
+}
+
+.tbtmg-level__input:checked + .tbtmg-level__box .tbtmg-level__name {
+	color: var(--tbt-ink);
+}
+
+/* The ring lands on the box because that is what the teacher can see; a 1px
+   outline in the corner of a hidden input is no focus ring at all. */
+.tbtmg-level__input:focus-visible + .tbtmg-level__box {
+	border-color: var(--tbt-blue);
+	box-shadow: var(--tbt-focus-ring);
+}
+
 /* ---------- Notices (Style Book §8) ---------- */
 
 .tbtmg-notice {
@@ -682,6 +793,10 @@ body {
 @media (max-width: 760px) {
 	.tbt-tool {
 		padding: 16px;
+	}
+
+	.tbtmg-levels__grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 
 	.tbt-tool .tbt-tool-hero__title {
