@@ -209,6 +209,16 @@
 			return node ? node.value : '';
 		}
 
+		/**
+		 * The chosen band. Falls back to the hidden carrier a teacher without
+		 * generation rights gets instead of the picker, so saving from the
+		 * Wording stage preserves the level rather than clearing it.
+		 */
+		function currentLevel() {
+			var chosen = root.querySelector('[data-tbtmg-levels] .tbtmg-level__input:checked');
+			return chosen ? chosen.value : fieldValue('level');
+		}
+
 		function renderPairs() {
 			pairsList.replaceChildren();
 
@@ -332,6 +342,7 @@
 			return {
 				title: fieldValue('title'),
 				topic: fieldValue('topic'),
+				level: currentLevel(),
 				eyebrow: fieldValue('eyebrow'),
 				instructions: fieldValue('instructions'),
 				left_column_title: fieldValue('left_column_title'),
@@ -361,7 +372,8 @@
 				body: {
 					topic: topic,
 					pair_count: parseInt(generatorValue('count'), 10) || config.minPairs,
-					additional_instructions: generatorValue('instructions')
+					additional_instructions: generatorValue('instructions'),
+					level: currentLevel()
 				}
 			}).then(function (response) {
 				var game = response.game || {};
@@ -548,6 +560,21 @@
 			);
 			main.append(meta);
 
+			/*
+			 * Published games only. A draft has no working public URL —
+			 * get_permalink() on a draft returns an address that 404s for a
+			 * student and for the teacher alike — which is the same reason the
+			 * share panel refuses to build one.
+			 */
+			var open = null;
+			if (game.status === 'publish' && game.permalink) {
+				open = el('a', 'tbtmg-button tbtmg-button--small', t('open'));
+				open.href = game.permalink;
+				open.target = '_blank';
+				open.rel = 'noopener';
+				open.setAttribute('aria-label', sprintf(t('openNewTab'), [game.title]));
+			}
+
 			var edit = el('a', 'tbtmg-button tbtmg-button--small', t('edit'));
 			edit.href = editUrl(game);
 
@@ -596,7 +623,7 @@
 				});
 			});
 
-			actions.append(edit, shareButton, duplicateButton, deleteButton);
+			actions.append.apply(actions, [open, edit, shareButton, duplicateButton, deleteButton].filter(Boolean));
 			item.append(main, actions, share);
 			return item;
 		}

@@ -3,7 +3,7 @@
  * Plugin Name:       TBT Matching Games
  * Plugin URI:        https://github.com/aparatofan/tbt_matching_game
  * Description:       Create, edit, publish, and embed AI-assisted matching games.
- * Version:           0.4.0
+ * Version:           0.5.0
  * Requires at least: 6.4
  * Requires PHP:      8.0
  * Author:            Mariusz Mirecki
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'TBTMG_VERSION', '0.4.0' );
+define( 'TBTMG_VERSION', '0.5.0' );
 define( 'TBTMG_FILE', __FILE__ );
 define( 'TBTMG_DIR', plugin_dir_path( __FILE__ ) );
 define( 'TBTMG_URL', plugin_dir_url( __FILE__ ) );
@@ -34,6 +34,7 @@ $includes = array(
 	'class-shortcode.php',
 	'class-tools-shortcode.php',
 	'class-template-loader.php',
+	'class-levels.php',
 	'class-openai-client.php',
 	'class-generation-controller.php',
 	'class-games-controller.php',

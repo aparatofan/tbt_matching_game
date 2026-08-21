@@ -45,6 +45,7 @@ final class Game_Repository {
 			'schema_version'     => 1,
 			'title'              => '',
 			'topic'              => '',
+			'level'              => '',
 			'eyebrow'            => __( 'Matching Challenge', 'tbt-matching-games' ),
 			'instructions'       => __( 'Match each item on the left with its partner on the right. Drag a card onto its partner or select the cards by clicking them.', 'tbt-matching-games' ),
 			'left_column_title'  => __( 'Left side', 'tbt-matching-games' ),
