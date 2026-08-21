@@ -23,6 +23,9 @@ Keep this file concise. It is loaded at the start of every Claude Code session.
 
 ## Architecture to preserve
 
+- The library and generator are designed to live on separate pages, wired by the
+  `generator` and `library` shortcode attributes; both must still work on a single
+  shared page when those attributes are absent.
 - Each game has one canonical WordPress entry. The standalone permalink and `[tbt_matching_game id="..."]` render that same game rather than parallel copies.
 - `[tbt_matching_generator]` and `[tbt_matching_games]` are the teacher-facing authoring/library surfaces.
 - A saved game remains playable without OpenAI; AI is for generation, not runtime play.

@@ -54,6 +54,15 @@ final class Tools_Shortcode {
 			return $gate;
 		}
 
+		$atts = shortcode_atts(
+			array(
+				'hero'    => 'yes',
+				'library' => '',
+			),
+			is_array( $atts ) ? $atts : array(),
+			self::GENERATOR_SHORTCODE
+		);
+
 		$game_id = $this->requested_game_id();
 		$data    = $game_id ? $this->repository->get( $game_id ) : Game_Repository::default_data();
 		$post    = $game_id ? get_post( $game_id ) : null;
@@ -69,7 +78,8 @@ final class Tools_Shortcode {
 				'permalink'    => $game_id ? (string) get_permalink( $game_id ) : '',
 				'can_generate' => Access::can_generate(),
 				'denied'       => $this->requested_but_denied(),
-				'hero'         => $this->hero( 'generator', $atts ),
+				'hero'         => $this->hero( 'generator', (string) $atts['hero'] ),
+				'library_url'  => self::library_url( (string) $atts['library'] ),
 			)
 		);
 	}
@@ -86,19 +96,6 @@ final class Tools_Shortcode {
 			return $gate;
 		}
 
-		$this->assets->enqueue_tools();
-
-		return $this->template( 'library.php', array( 'hero' => $this->hero( 'library', $atts ) ) );
-	}
-
-	/**
-	 * Hero copy for a tool page, or null when the page suppresses it.
-	 *
-	 * @param string       $context Either 'generator' or 'library'.
-	 * @param array|string $atts Shortcode attributes.
-	 * @return array|null
-	 */
-	private function hero( string $context, $atts ): ?array {
 		/*
 		 * The library defaults to no hero: it normally shares a page with the
 		 * generator, whose hero already owns the page identity, and a second one
@@ -106,12 +103,34 @@ final class Tools_Shortcode {
 		 * lives on its own page.
 		 */
 		$atts = shortcode_atts(
-			array( 'hero' => 'library' === $context ? 'no' : 'yes' ),
+			array(
+				'hero'      => 'no',
+				'generator' => '',
+			),
 			is_array( $atts ) ? $atts : array(),
-			'generator' === $context ? self::GENERATOR_SHORTCODE : self::LIBRARY_SHORTCODE
+			self::LIBRARY_SHORTCODE
 		);
 
-		if ( 'yes' !== strtolower( (string) $atts['hero'] ) ) {
+		$this->assets->enqueue_tools();
+
+		return $this->template(
+			'library.php',
+			array(
+				'hero'          => $this->hero( 'library', (string) $atts['hero'] ),
+				'generator_url' => self::generator_url( (string) $atts['generator'] ),
+			)
+		);
+	}
+
+	/**
+	 * Hero copy for a tool page, or null when the page suppresses it.
+	 *
+	 * @param string $context Either 'generator' or 'library'.
+	 * @param string $show    Resolved hero="…" attribute.
+	 * @return array|null
+	 */
+	private function hero( string $context, string $show ): ?array {
+		if ( 'yes' !== strtolower( $show ) ) {
 			return null;
 		}
 
@@ -147,26 +166,77 @@ final class Tools_Shortcode {
 	}
 
 	/**
-	 * The generator page URL, used by the library's edit links.
+	 * The generator page URL, used by the library's edit and create actions.
 	 *
+	 * @param string $attribute The library shortcode's generator="…" value.
 	 * @return string
 	 */
-	public static function generator_url(): string {
-		$default = '';
-		$post    = get_post();
-		if ( $post instanceof \WP_Post ) {
-			$default = (string) get_permalink( $post );
+	public static function generator_url( string $attribute = '' ): string {
+		$default = self::clean_url( $attribute );
+
+		if ( '' === $default ) {
+			$post = get_post();
+			if ( $post instanceof \WP_Post ) {
+				$default = (string) get_permalink( $post );
+			}
 		}
 
 		/**
 		 * Filter the URL of the page holding [tbt_matching_generator].
 		 *
-		 * Defaults to the current page, which is right when both shortcodes
-		 * share one page and wrong when they do not — hence the filter.
+		 * Applied last, over whatever the generator="…" attribute resolved to,
+		 * so a site that already overrides this keeps winning. With no
+		 * attribute and no filter the default is the current page, which is
+		 * right when both shortcodes share one.
 		 *
 		 * @param string $url Generator page URL.
 		 */
 		return (string) apply_filters( 'tbt_matching_games_generator_url', $default );
+	}
+
+	/**
+	 * The library page URL, used by the generator's back link and discard.
+	 *
+	 * There is deliberately no current-page default: on a shared page a link
+	 * back to the page you are already on is noise, and after a discard it
+	 * would return the teacher to the game they just deleted. Nothing resolved
+	 * means neither control renders.
+	 *
+	 * @param string $attribute The generator shortcode's library="…" value.
+	 * @return string
+	 */
+	public static function library_url( string $attribute = '' ): string {
+		return self::clean_url( $attribute );
+	}
+
+	/**
+	 * Sanitise a page URL attribute.
+	 *
+	 * Accepts an absolute URL or a site-root-relative path, because the site
+	 * owner types these into a Divi page rather than into PHP. Anything else
+	 * resolves to an empty string, which every caller reads as "not set".
+	 *
+	 * @param string $value Raw attribute value.
+	 * @return string
+	 */
+	private static function clean_url( string $value ): string {
+		$value = trim( $value );
+		if ( '' === $value ) {
+			return '';
+		}
+
+		if ( 0 === strpos( $value, '/' ) && 0 !== strpos( $value, '//' ) ) {
+			// esc_url_raw() judges absolute URLs, so resolve the path first.
+			$value = home_url( $value );
+		} elseif ( ! preg_match( '#^https?://#i', $value ) ) {
+			/*
+			 * A bare word is not a URL. Left alone, esc_url_raw() would promote
+			 * "library" to http://library and send the teacher off the site.
+			 */
+			return '';
+		}
+
+		return (string) esc_url_raw( $value );
 	}
 
 	/**

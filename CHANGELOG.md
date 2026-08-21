@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.7.0 — 2026-08-21
+
+- The library and the generator are meant to live on two pages now. Sharing one
+  made the page two things at once — a catalogue of what exists and a workspace
+  for what does not yet — and the library had to give up its hero to the
+  generator to avoid saying the same thing twice. Split apart, each page is one
+  thing: a catalogue, and a workspace that is only about the game named in its
+  hero.
+- Two shortcode attributes wire them together. `[tbt_matching_games
+  generator="/create-a-game/"]` is where Edit and Create new send the teacher;
+  `[tbt_matching_generator library="/my-games/"]` is where Back to library and a
+  completed discard send them back. Both take an absolute URL or a
+  site-root-relative path. The site owner edits Divi pages, not PHP, so this is
+  an attribute rather than a settings screen, and the existing
+  `tbt_matching_games_generator_url` filter still overrides it for anyone using
+  it.
+- With neither attribute set the plugin behaves exactly as 0.6.0 did: both
+  shortcodes work on one shared page, edit links point at the current page, and
+  neither the back link nor discard renders. That is what makes this release
+  deployable before the second Divi page exists.
+- Creating a game is now a deliberate act. Create new opens a dialog asking for
+  the title and nothing else — no level, no visibility, no settings — and
+  creating it lands the teacher on the generator, editing that draft. The title
+  field counts down from the 30 characters the hero can hold, because that cap
+  is a layout constraint and a teacher should see the boundary rather than find
+  it by having a title truncated. The dialog traps focus, closes on `Esc` or a
+  backdrop click, returns focus to the button that opened it, and refuses to
+  submit twice.
+- The CEFR picker stays where it is, in Stage 1. The level is a generation
+  parameter that travels with the topic and the pair count to the button that
+  consumes it; the dialog exists to name the object and bring it into being.
+- Discard game removes an abandoned draft and returns to the library. It appears
+  only on a draft: deleting a published game is the library's job, where a
+  teacher can see it leaving the whole collection, and discard is here to undo a
+  creation rather than to duplicate delete. It also stays hidden when no library
+  URL resolves, since discarding the game being edited with nowhere to go would
+  leave the teacher on a page about a game that no longer exists.
+
 ## 0.6.0 — 2026-08-21
 
 - Library search now finds a game by its topic, not only its title. The

@@ -215,6 +215,9 @@ final class Assets {
 			'nonce'        => wp_create_nonce( 'wp_rest' ),
 			'minPairs'     => Game_Validator::MIN_PAIRS,
 			'maxPairs'     => Game_Validator::MAX_PAIRS,
+			// The create dialog is built in JS, so it needs the same cap the
+			// server-rendered title fields carry.
+			'titleMax'     => Game_Validator::TITLE_MAX,
 			'canGenerate'  => Access::can_generate(),
 			'gameId'       => $game_id,
 			'generatorUrl' => esc_url_raw( Tools_Shortcode::generator_url() ),
@@ -242,6 +245,17 @@ final class Assets {
 				'confirmDelete'   => __( 'Move this game to the trash?', 'tbt-matching-games' ),
 				'deleted'         => __( 'Game moved to the trash.', 'tbt-matching-games' ),
 				'duplicated'      => __( 'A draft copy was created.', 'tbt-matching-games' ),
+				'createHeading'   => __( 'Create a new game', 'tbt-matching-games' ),
+				'titleLabel'      => __( 'Game title', 'tbt-matching-games' ),
+				'cancel'          => __( 'Cancel', 'tbt-matching-games' ),
+				'create'          => __( 'Create', 'tbt-matching-games' ),
+				'creating'        => __( 'Creating…', 'tbt-matching-games' ),
+				/* translators: %d: number of characters still allowed in the title. */
+				'charsLeft'       => __( '%d characters left', 'tbt-matching-games' ),
+				'createFailed'    => __( 'The game could not be created.', 'tbt-matching-games' ),
+				/* translators: %s: game title. */
+				'confirmDiscard'  => __( 'Discard “%s”? It will be moved to the trash.', 'tbt-matching-games' ),
+				'discarding'      => __( 'Discarding…', 'tbt-matching-games' ),
 				'copy'            => __( 'Copy', 'tbt-matching-games' ),
 				'copied'          => __( 'Copied', 'tbt-matching-games' ),
 				'gameLink'        => __( 'Game link', 'tbt-matching-games' ),

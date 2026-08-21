@@ -5,7 +5,7 @@
  * Rows are rendered by tools.js from GET /games so search, pagination and the
  * row actions all read from one owner-scoped source of truth.
  *
- * Available variables: $hero.
+ * Available variables: $hero, $generator_url.
  *
  * @package TBT_Matching_Games
  */
@@ -17,8 +17,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $tbtmg_uid = 'tbtmg-lib-' . wp_unique_id();
+
+/*
+ * The resolved generator URL travels on the markup rather than in the localised
+ * config: the bundle is localised once, before any shortcode has run, and two
+ * libraries on one page may point at different generators.
+ */
+$tbtmg_generator_url = isset( $generator_url ) ? (string) $generator_url : '';
 ?>
-<div class="tbt tbt-tool tbtmg-tool tbtmg-library" data-tbtmg-tool="library">
+<div class="tbt tbt-tool tbtmg-tool tbtmg-library" data-tbtmg-tool="library" data-tbtmg-generator-url="<?php echo esc_url( $tbtmg_generator_url ); ?>">
 
 	<?php require TBTMG_DIR . 'templates/tool-hero.php'; ?>
 
@@ -57,6 +64,19 @@ $tbtmg_uid = 'tbtmg-lib-' . wp_unique_id();
 				<option value="none"><?php esc_html_e( 'Not set', 'tbt-matching-games' ); ?></option>
 			</select>
 		</div>
+
+		<?php
+		/*
+		 * No generator URL, no button: creating a game would have nowhere to
+		 * land. The generator's own title field still creates one wherever the
+		 * generator itself is reachable.
+		 */
+		?>
+		<?php if ( '' !== $tbtmg_generator_url ) : ?>
+			<button type="button" class="tbtmg-button tbtmg-button--primary tbtmg-library__create" data-tbtmg-create>
+				<?php esc_html_e( 'Create new', 'tbt-matching-games' ); ?>
+			</button>
+		<?php endif; ?>
 	</div>
 
 	<div class="tbtmg-notice" data-tbtmg-notice role="status" aria-live="polite" hidden></div>
