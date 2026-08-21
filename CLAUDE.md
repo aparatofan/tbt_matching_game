@@ -28,6 +28,7 @@ Keep this file concise. It is loaded at the start of every Claude Code session.
 - A saved game remains playable without OpenAI; AI is for generation, not runtime play.
 - Ownership is `post_author`. Front-end CRUD is owner-scoped; do not weaken ownership checks for convenience.
 - REST routes under `tbt-matching-games/v1` require the WordPress REST nonce and appropriate access checks.
+- `_tbtmg_level` and `_tbtmg_search` are a derived index maintained by `Search_Index`; `_tbtmg_game_data` remains canonical and the index is never a source of truth.
 - Generation must not publish automatically. Incomplete work may be preserved as draft rather than discarded.
 - Draft/private games are not public; published games are deliberately accessible to students who have the link.
 

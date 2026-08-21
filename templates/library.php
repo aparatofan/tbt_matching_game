@@ -38,6 +38,25 @@ $tbtmg_uid = 'tbtmg-lib-' . wp_unique_id();
 				autocomplete="off"
 			>
 		</div>
+
+		<div class="tbtmg-field tbtmg-field--level">
+			<label for="<?php echo esc_attr( $tbtmg_uid ); ?>-level"><?php esc_html_e( 'Level', 'tbt-matching-games' ); ?></label>
+			<select id="<?php echo esc_attr( $tbtmg_uid ); ?>-level" data-tbtmg-level-filter>
+				<option value=""><?php esc_html_e( 'All levels', 'tbt-matching-games' ); ?></option>
+				<?php foreach ( Levels::band_names() as $tbtmg_band => $tbtmg_band_name ) : ?>
+					<?php
+					$tbtmg_band_label = sprintf(
+						/* translators: 1: CEFR band code, e.g. B2. 2: plain-English band name, e.g. upper-intermediate. */
+						__( '%1$s · %2$s', 'tbt-matching-games' ),
+						$tbtmg_band,
+						$tbtmg_band_name
+					);
+					?>
+					<option value="<?php echo esc_attr( $tbtmg_band ); ?>"><?php echo esc_html( $tbtmg_band_label ); ?></option>
+				<?php endforeach; ?>
+				<option value="none"><?php esc_html_e( 'Not set', 'tbt-matching-games' ); ?></option>
+			</select>
+		</div>
 	</div>
 
 	<div class="tbtmg-notice" data-tbtmg-notice role="status" aria-live="polite" hidden></div>

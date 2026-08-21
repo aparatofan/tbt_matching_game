@@ -653,8 +653,47 @@ body {
 	background: var(--tbt-border);
 }
 
+/*
+ * Search takes the width it can get; the level filter takes only what it
+ * needs. Below 600px they stack, so neither is squeezed on a phone.
+ */
 .tbtmg-library__head {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	align-items: flex-end;
 	margin-bottom: 24px;
+}
+
+.tbtmg-library__head .tbtmg-field {
+	margin-bottom: 0;
+}
+
+.tbtmg-library__head .tbtmg-field--search {
+	flex: 1 1 240px;
+	min-width: 0;
+}
+
+.tbtmg-library__head .tbtmg-field--level {
+	flex: 0 0 auto;
+}
+
+.tbtmg-library__head .tbtmg-field--level select {
+	width: auto;
+	min-width: 200px;
+	min-height: 44px;
+}
+
+@media (max-width: 600px) {
+	.tbtmg-library__head {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.tbtmg-library__head .tbtmg-field--level select {
+		width: 100%;
+		min-width: 0;
+	}
 }
 
 .tbtmg-library__list {
@@ -733,6 +772,16 @@ body {
 .tbtmg-badge--draft {
 	background: var(--tbt-input);
 	color: var(--tbt-muted);
+}
+
+/*
+ * Identity, not interaction: the level a game was written for is a fact about
+ * it, so the chip stays neutral. Blue belongs to things a teacher can act on.
+ */
+.tbtmg-badge--level {
+	border: 1px solid var(--tbt-border);
+	background: var(--tbt-surface);
+	color: var(--tbt-ink);
 }
 
 /* Whitespace, not a card: pagination is navigation, not an object. */

@@ -81,6 +81,18 @@ final class Games_Controller {
 								return (int) $value;
 							},
 						),
+						'level'    => array(
+							'type'              => 'string',
+							'default'           => '',
+							'sanitize_callback' => static function ( $value ): string {
+								$value = is_string( $value ) ? trim( $value ) : '';
+
+								// 'none' is a real choice — the unlevelled games —
+								// so it survives; anything unrecognised falls back
+								// to no filter at all.
+								return 'none' === $value ? 'none' : Levels::normalise( $value );
+							},
+						),
 					),
 				),
 				array(
@@ -184,9 +196,42 @@ final class Games_Controller {
 			'paged'          => $page,
 			'orderby'        => 'modified',
 			'order'          => 'DESC',
-			's'              => (string) $request->get_param( 'search' ),
 			'author'         => get_current_user_id(),
 		);
+
+		/*
+		 * Not 's': a WP_Query search reaches post_title only, and topic lives
+		 * inside the serialised blob. Both are in the flat _tbtmg_search index
+		 * instead, so the placeholder's promise of "Title or topic" holds.
+		 */
+		$meta_query = array();
+
+		$search = Search_Index::normalise_term( (string) $request->get_param( 'search' ) );
+		if ( '' !== $search ) {
+			// WP_Query adds the wildcards and the esc_like() escaping.
+			$meta_query[] = array(
+				'key'     => Search_Index::SEARCH_META,
+				'compare' => 'LIKE',
+				'value'   => $search,
+			);
+		}
+
+		$level = (string) $request->get_param( 'level' );
+		if ( '' !== $level ) {
+			$meta_query[] = array(
+				'key'     => Search_Index::LEVEL_META,
+				'compare' => '=',
+				'value'   => 'none' === $level ? '' : $level,
+			);
+		}
+
+		if ( count( $meta_query ) > 1 ) {
+			$meta_query['relation'] = 'AND';
+		}
+
+		if ( ! empty( $meta_query ) ) {
+			$args['meta_query'] = $meta_query;
+		}
 
 		// Only an administrator may widen the scope, and only by asking for it.
 		if ( 0 === (int) $request->get_param( 'author' ) && Access::can_view_all() ) {
@@ -333,6 +378,10 @@ final class Games_Controller {
 			update_post_meta( (int) $post_id, Game_Repository::META_KEY, $stored );
 		}
 
+		// The copy carries the original's blob but its own title, so the index
+		// is rebuilt from the new post rather than copied with the blob.
+		Search_Index::rebuild( (int) $post_id );
+
 		$copy = get_post( (int) $post_id );
 
 		return new \WP_REST_Response(
@@ -471,6 +520,7 @@ final class Games_Controller {
 			'status'     => $post->post_status,
 			'pair_count' => count( $data['pairs'] ),
 			'topic'      => $data['topic'],
+			'level'      => $data['level'],
 			'modified'   => get_post_modified_time( 'c', true, $post ),
 			'permalink'  => get_permalink( $post ),
 			'shortcode'  => sprintf( '[tbt_matching_game id="%d"]', $post->ID ),
