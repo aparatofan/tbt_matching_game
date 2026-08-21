@@ -146,10 +146,35 @@ access get an upsell, and no tool markup is rendered for either.
 `[tbt_matching_generator]` generates, edits and saves a game. It edits an existing game when
 the page is opened with `?game_id=123`, which is what the library's Edit links do.
 
-The generator opens with the canonical Tool Hero. The library does not: the two normally
-share a page, and a second hero would only repeat the first. Either shortcode can be told
-otherwise — `hero="no"` suppresses the generator's, `hero="yes"` gives a standalone library
-one of its own:
+### Two pages, or one
+
+The two surfaces are designed to live on separate pages: the library is a catalogue of what
+exists, the generator a workspace for one game. Each takes the other's URL as an attribute,
+so the arrangement is set by editing the Divi pages rather than by editing PHP:
+
+```text
+On the library page:    [tbt_matching_games hero="yes" generator="/create-a-game/"]
+On the generator page:  [tbt_matching_generator library="/my-games/"]
+```
+
+`generator="…"` is where the library's **Create new** and per-row **Edit** send the teacher.
+`library="…"` is where the generator's **Back to library** link and a completed **Discard
+game** send them back. Both accept an absolute URL or a site-root-relative path; anything
+else is ignored. A generator URL that already carries a query string keeps it — `game_id` is
+appended rather than substituted.
+
+**Omitting both attributes preserves the single-page behaviour exactly.** With no
+`generator` set, Edit and Create new point at the current page, which is correct when both
+shortcodes share one; with no `library` set, neither the back link nor Discard game renders,
+because there is nowhere for them to go and browser history is not a substitute. Nothing has
+to change on an existing installation. `tbt_matching_games_generator_url` still overrides
+the generator URL for anyone already filtering it: it is applied last, over whatever the
+attribute resolved to.
+
+The generator opens with the canonical Tool Hero. The library defaults to no hero: the two
+originally shared a page, and a second hero would only repeat the first. Either shortcode
+can be told otherwise — `hero="no"` suppresses the generator's, `hero="yes"` gives a
+library on its own page one of its own:
 
 ```text
 [tbt_matching_generator hero="no"]
@@ -195,6 +220,27 @@ diacritics — a search for `Ćwiczenie` and one for `ćwiczenie` return the sam
 the search field, a level filter narrows the list to one CEFR band, or to `Not set` for the
 games made before the level picker existed. Search and filter combine, and either one resets
 the list to page 1.
+
+### Creating and discarding
+
+**Create new**, beside the search field, opens a dialog that asks for the game title and
+nothing else — no level, no visibility, no settings. Confirming it creates a draft owned by
+the current teacher and opens the generator on that game. The field is capped at 30
+characters with a live count of what is left, because that cap is what the player's hero can
+hold rather than an arbitrary limit. The dialog traps focus, cancels on `Esc` or a click on
+the backdrop, and returns focus to the button that opened it; a failed create leaves the
+teacher in the dialog with the error rather than on a blank generator page. The button does
+not render when no generator URL resolves, since there would be nowhere to land.
+
+The CEFR level stays in Stage 1 of the generator, where the Generate button consumes it. It
+is a generation parameter, not part of naming the game.
+
+**Discard game** appears at the foot of the generator, and only while the game being edited
+is a draft. It moves the draft to the trash and returns to the library. A published game is
+deleted from the library instead, where the row shows what is being removed; discard exists
+to undo an abandoned creation, not to duplicate delete. Like the back link, it does not
+render without a library URL. Ownership is enforced by the REST route, so it can never reach
+another teacher's game.
 
 Access requires the `tbt_use_teaching_tools` capability, granted on activation to the
 administrator role and to every role listed in TBT Swipe's `tbt_swipe_manager_roles`

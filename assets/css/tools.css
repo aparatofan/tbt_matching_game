@@ -62,6 +62,38 @@ body {
 	display: none !important;
 }
 
+/* ---------- Back link ---------- */
+
+/*
+ * Page chrome, above the hero rather than inside it: the hero states what this
+ * game is, and the way out of the page is not part of that statement.
+ */
+.tbtmg-backlink {
+	margin-bottom: 16px;
+}
+
+.tbtmg-backlink__link {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--tbt-blue);
+	font-family: var(--tbt-font-ui);
+	font-size: 14px;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.tbtmg-backlink__link:hover {
+	color: var(--tbt-blue-dark);
+	text-decoration: underline;
+}
+
+.tbtmg-backlink__link:focus-visible {
+	border-radius: var(--tbt-radius-control);
+	box-shadow: var(--tbt-focus-ring);
+	outline: none;
+}
+
 /* ---------- Tool Hero (Style Book §6B) ---------- */
 
 .tbt-tool-hero {
@@ -367,6 +399,16 @@ body {
 
 .tbtmg-actions--save {
 	margin-top: 32px;
+}
+
+/*
+ * The destructive option lives at the end of the page, behind its own rule and
+ * well away from Save: a mis-tap here costs the game being built.
+ */
+.tbtmg-actions--discard {
+	margin-top: 48px;
+	padding-top: 24px;
+	border-top: 1px solid var(--tbt-border);
 }
 
 .tbtmg-status {
@@ -684,6 +726,12 @@ body {
 	min-height: 44px;
 }
 
+/* Create new closes the row: the filters narrow what is there, this adds to it. */
+.tbtmg-library__create {
+	flex: 0 0 auto;
+	margin-left: auto;
+}
+
 @media (max-width: 600px) {
 	.tbtmg-library__head {
 		flex-direction: column;
@@ -693,6 +741,11 @@ body {
 	.tbtmg-library__head .tbtmg-field--level select {
 		width: 100%;
 		min-width: 0;
+	}
+
+	/* Stacked, auto would push the button off the right edge of the column. */
+	.tbtmg-library__create {
+		margin-left: 0;
 	}
 }
 
@@ -797,6 +850,85 @@ body {
 	color: var(--tbt-muted);
 	font-family: var(--tbt-font-ui);
 	font-size: 14px;
+}
+
+/* ---------- Create dialog ---------- */
+
+/*
+ * Mounted on <body> by tools.js: a tool can sit inside a Divi section carrying
+ * its own transform, and a transformed ancestor makes position: fixed resolve
+ * against that element rather than the viewport.
+ *
+ * It keeps the .tbt-tool class for the type and control resets, so the padding
+ * and background that class sets for a page surface are overridden here.
+ */
+.tbtmg-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+	overflow-y: auto;
+	background: rgba(31, 41, 55, .55);
+}
+
+.tbtmg-modal__dialog {
+	width: 100%;
+	max-width: 480px;
+	padding: 32px;
+	border-radius: var(--tbt-radius-panel);
+	background: var(--tbt-surface);
+	box-shadow: var(--tbt-shadow-raised);
+}
+
+.tbtmg-modal__title {
+	margin-bottom: 24px;
+	color: var(--tbt-blue);
+	font-family: var(--tbt-font-content);
+	font-size: 24px;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.tbtmg-modal .tbtmg-field {
+	margin-bottom: 0;
+}
+
+/* Style Book §3: the title is learning material, not a database field. */
+.tbtmg-modal .tbtmg-field input[type="text"] {
+	font-family: var(--tbt-font-content);
+}
+
+.tbtmg-modal__count {
+	margin-top: 8px;
+	color: var(--tbt-muted);
+	font-family: var(--tbt-font-ui);
+	font-size: 14px;
+}
+
+.tbtmg-modal__error {
+	margin-top: 16px;
+	margin-bottom: 0;
+}
+
+.tbtmg-modal__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	justify-content: flex-end;
+	margin-top: 32px;
+}
+
+@media (max-width: 600px) {
+	.tbtmg-modal__dialog {
+		padding: 24px;
+	}
+
+	.tbtmg-modal__actions .tbtmg-button {
+		flex: 1 1 auto;
+	}
 }
 
 /* ---------- Share ---------- */

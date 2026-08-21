@@ -100,6 +100,22 @@
 		return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 	}
 
+	/**
+	 * Add game_id to a page URL without disturbing what it already carries.
+	 */
+	function appendGameId(base, id) {
+		var target = String(base);
+		var hash = '';
+		var index = target.indexOf('#');
+
+		if (index !== -1) {
+			hash = target.slice(index);
+			target = target.slice(0, index);
+		}
+
+		return target + (target.indexOf('?') === -1 ? '?' : '&') + 'game_id=' + encodeURIComponent(id) + hash;
+	}
+
 	function copyToClipboard(value) {
 		if (window.navigator.clipboard && window.navigator.clipboard.writeText) {
 			return window.navigator.clipboard.writeText(value);
@@ -176,6 +192,172 @@
 	}
 
 	/**
+	 * The create dialog: name the game, and it exists.
+	 *
+	 * Mounted on <body> rather than beside the button that opened it. A tool can
+	 * sit inside a Divi section carrying its own transform, and a transformed
+	 * ancestor makes position: fixed resolve against that element instead of the
+	 * viewport — the overlay would then cover part of the page, not the page.
+	 *
+	 * @param {Object} options opener element and the generator URL to land on.
+	 */
+	function openCreateDialog(options) {
+		var max = parseInt(config.titleMax, 10) || 30;
+		var uid = 'tbtmg-create-' + Math.random().toString(36).slice(2, 9);
+		var overlay = el('div', 'tbt tbt-tool tbtmg-modal');
+		var dialog = el('div', 'tbtmg-modal__dialog');
+		var heading = el('h2', 'tbtmg-modal__title', t('createHeading'));
+		var field = el('div', 'tbtmg-field');
+		var label = el('label', null, t('titleLabel'));
+		var input = document.createElement('input');
+		var counter = el('p', 'tbtmg-modal__count');
+		var errorBox = el('p', 'tbtmg-notice tbtmg-notice--error tbtmg-modal__error');
+		var actions = el('div', 'tbtmg-modal__actions');
+		var cancel = el('button', 'tbtmg-button', t('cancel'));
+		var create = el('button', 'tbtmg-button tbtmg-button--primary', t('create'));
+		var pending = false;
+
+		dialog.setAttribute('role', 'dialog');
+		dialog.setAttribute('aria-modal', 'true');
+		dialog.setAttribute('aria-labelledby', uid + '-title');
+		heading.id = uid + '-title';
+
+		input.type = 'text';
+		input.id = uid + '-input';
+		input.maxLength = max;
+		input.autocomplete = 'off';
+		label.setAttribute('for', input.id);
+
+		counter.id = uid + '-count';
+		// The cap is a hero layout constraint, so the boundary is shown rather
+		// than discovered by having the title silently truncated.
+		counter.setAttribute('aria-live', 'polite');
+		input.setAttribute('aria-describedby', counter.id);
+
+		errorBox.hidden = true;
+		cancel.type = 'button';
+		create.type = 'button';
+
+		function showError(message) {
+			errorBox.textContent = message || '';
+			errorBox.hidden = !message;
+		}
+
+		function sync() {
+			counter.textContent = sprintf(t('charsLeft'), [Math.max(0, max - input.value.length)]);
+			create.disabled = pending || input.value.trim() === '';
+		}
+
+		function focusable() {
+			return Array.prototype.filter.call(dialog.querySelectorAll('input, button'), function (node) {
+				return !node.disabled;
+			});
+		}
+
+		function close() {
+			// A create is already on its way; letting the dialog go now would
+			// leave the teacher on the library with a draft appearing behind them.
+			if (pending) {
+				return;
+			}
+
+			overlay.remove();
+			if (options.opener && typeof options.opener.focus === 'function') {
+				options.opener.focus();
+			}
+		}
+
+		function submit() {
+			var title = input.value.trim();
+			if (!title || pending) {
+				return;
+			}
+
+			pending = true;
+			create.disabled = true;
+			cancel.disabled = true;
+			create.textContent = t('creating');
+			showError('');
+
+			request(config.restBase, { method: 'POST', body: { title: title } }).then(function (response) {
+				var game = response && response.game ? response.game : null;
+				if (!game || !game.id) {
+					throw new Error(t('createFailed'));
+				}
+
+				/*
+				 * The response also carries the validation message explaining
+				 * why a game with no pairs cannot publish yet. That is the
+				 * expected outcome here, not a failure: the draft exists, and
+				 * the generator is where the pairs get added.
+				 */
+				window.location.href = appendGameId(options.generatorUrl, game.id);
+			}).catch(function (error) {
+				pending = false;
+				cancel.disabled = false;
+				create.textContent = t('create');
+				sync();
+				showError(messageFor(error));
+				input.focus();
+			});
+		}
+
+		overlay.addEventListener('click', function (event) {
+			if (event.target === overlay) {
+				close();
+			}
+		});
+
+		overlay.addEventListener('keydown', function (event) {
+			if (event.key === 'Escape') {
+				event.preventDefault();
+				close();
+				return;
+			}
+
+			if (event.key !== 'Tab') {
+				return;
+			}
+
+			var nodes = focusable();
+			if (!nodes.length) {
+				event.preventDefault();
+				return;
+			}
+
+			var first = nodes[0];
+			var last = nodes[nodes.length - 1];
+
+			if (event.shiftKey && document.activeElement === first) {
+				event.preventDefault();
+				last.focus();
+			} else if (!event.shiftKey && document.activeElement === last) {
+				event.preventDefault();
+				first.focus();
+			}
+		});
+
+		input.addEventListener('input', sync);
+		input.addEventListener('keydown', function (event) {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				submit();
+			}
+		});
+		cancel.addEventListener('click', close);
+		create.addEventListener('click', submit);
+
+		field.append(label, input, counter);
+		actions.append(cancel, create);
+		dialog.append(heading, field, errorBox, actions);
+		overlay.append(dialog);
+		document.body.appendChild(overlay);
+
+		sync();
+		input.focus();
+	}
+
+	/**
 	 * The generator tool.
 	 */
 	function initGenerator(root) {
@@ -189,6 +371,10 @@
 		var saveStatus = root.querySelector('[data-tbtmg-save-status]');
 		var generateButton = root.querySelector('[data-tbtmg-generate]');
 		var generateStatus = root.querySelector('[data-tbtmg-generate-status]');
+		var discardButton = root.querySelector('[data-tbtmg-discard]');
+		var discardRow = root.querySelector('[data-tbtmg-discard-row]');
+		var discardStatus = root.querySelector('[data-tbtmg-discard-status]');
+		var libraryUrl = root.getAttribute('data-tbtmg-library-url') || '';
 		var pairs = [];
 		var generation = null;
 
@@ -425,6 +611,7 @@
 					notify(root, response.message, true);
 				}
 				showShare(game);
+				syncDiscard(response.status);
 				offerNewGame();
 			}).catch(function (error) {
 				saveStatus.textContent = '';
@@ -467,6 +654,43 @@
 			window.location.href = url.toString();
 		}
 
+		/**
+		 * Discard is for an abandoned draft. A save that publishes the game
+		 * takes the button away without a reload: from that point the library's
+		 * Delete is the only way to remove it, where a teacher can see it
+		 * leaving the whole collection.
+		 */
+		function syncDiscard(status) {
+			if (discardRow) {
+				discardRow.hidden = 'draft' !== status;
+			}
+		}
+
+		function discard() {
+			if (!gameId || !libraryUrl) {
+				return;
+			}
+
+			// Name the game being discarded: on a page with one title field and
+			// three panels, "this game" is not specific enough to act on.
+			var title = fieldValue('title').trim();
+			if (!window.confirm(title ? sprintf(t('confirmDiscard'), [title]) : t('confirmDelete'))) {
+				return;
+			}
+
+			discardButton.disabled = true;
+			discardStatus.textContent = t('discarding');
+			notify(root, '');
+
+			request(config.restBase + '/' + gameId, { method: 'DELETE' }).then(function () {
+				window.location.href = libraryUrl;
+			}).catch(function (error) {
+				discardStatus.textContent = '';
+				discardButton.disabled = false;
+				notify(root, messageFor(error), true);
+			});
+		}
+
 		function openPanelContaining(node) {
 			var panel = node ? node.closest('[data-tbtmg-panel]') : null;
 			if (!panel || panel.classList.contains('is-open')) {
@@ -488,6 +712,9 @@
 		}
 		if (newButton) {
 			newButton.addEventListener('click', startNewGame);
+		}
+		if (discardButton) {
+			discardButton.addEventListener('click', discard);
 		}
 		root.addEventListener('input', offerSave);
 
@@ -533,12 +760,20 @@
 		var pagination = root.querySelector('[data-tbtmg-pagination]');
 		var search = root.querySelector('[data-tbtmg-search]');
 		var levelFilter = root.querySelector('[data-tbtmg-level-filter]');
+		var createButton = root.querySelector('[data-tbtmg-create]');
+		/*
+		 * The generator URL travels on the markup rather than in config: the
+		 * bundle is localised once, before any shortcode has run, so a
+		 * per-instance attribute cannot reach it. config.generatorUrl stays the
+		 * fallback — it carries the filter and the current-page default, which
+		 * is what a page with no attributes set has always used.
+		 */
+		var generatorUrl = root.getAttribute('data-tbtmg-generator-url') || config.generatorUrl || '';
 		var state = { page: 1, search: '', level: '', totalPages: 1 };
 		var searchTimer = null;
 
 		function editUrl(game) {
-			var base = config.generatorUrl || window.location.href;
-			return base + (base.indexOf('?') === -1 ? '?' : '&') + 'game_id=' + game.id;
+			return appendGameId(generatorUrl || window.location.href, game.id);
 		}
 
 		function row(game) {
@@ -711,6 +946,16 @@
 					state.page = 1;
 					load();
 				}, 300);
+			});
+		}
+
+		/*
+		 * The button is only rendered when the server resolved a generator URL,
+		 * so there is always somewhere for a new game to land.
+		 */
+		if (createButton && generatorUrl) {
+			createButton.addEventListener('click', function () {
+				openCreateDialog({ opener: createButton, generatorUrl: generatorUrl });
 			});
 		}
 

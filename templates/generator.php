@@ -2,7 +2,8 @@
 /**
  * Front-end generator tool.
  *
- * Available variables: $game_id, $data, $status, $permalink, $can_generate, $denied, $hero.
+ * Available variables: $game_id, $data, $status, $permalink, $can_generate, $denied, $hero,
+ * $library_url.
  *
  * @package TBT_Matching_Games
  */
@@ -34,8 +35,31 @@ if ( '' === $tbtmg_level_initial ) {
 	$tbtmg_level_initial = Levels::initial_band( get_current_user_id() );
 }
 $tbtmg_level_names = Levels::band_names();
+
+/*
+ * The resolved library URL travels on the markup rather than in the localised
+ * config: the bundle is localised once, before any shortcode has run.
+ */
+$tbtmg_library_url = isset( $library_url ) ? (string) $library_url : '';
 ?>
-<div class="tbt tbt-tool tbtmg-tool tbtmg-generator" data-tbtmg-tool="generator" data-tbtmg-game-id="<?php echo esc_attr( (string) $game_id ); ?>">
+<div class="tbt tbt-tool tbtmg-tool tbtmg-generator" data-tbtmg-tool="generator" data-tbtmg-game-id="<?php echo esc_attr( (string) $game_id ); ?>" data-tbtmg-library-url="<?php echo esc_url( $tbtmg_library_url ); ?>">
+
+	<?php
+	/*
+	 * Above the hero, not inside it: the hero says what this game is, and the
+	 * way out of the page is chrome rather than part of that statement. With no
+	 * library URL resolved there is nothing to link to, and browser history is
+	 * not a substitute — the teacher may have arrived here from anywhere.
+	 */
+	?>
+	<?php if ( '' !== $tbtmg_library_url ) : ?>
+		<p class="tbtmg-backlink">
+			<a class="tbtmg-backlink__link" href="<?php echo esc_url( $tbtmg_library_url ); ?>">
+				<span class="tbtmg-backlink__arrow" aria-hidden="true">&#8592;</span>
+				<?php esc_html_e( 'Back to library', 'tbt-matching-games' ); ?>
+			</a>
+		</p>
+	<?php endif; ?>
 
 	<?php require TBTMG_DIR . 'templates/tool-hero.php'; ?>
 
@@ -230,6 +254,22 @@ $tbtmg_level_names = Levels::band_names();
 	</div>
 
 	<div class="tbtmg-share" data-tbtmg-share hidden></div>
+
+	<?php
+	/*
+	 * Drafts only. Deleting a published game is the library's job, where the
+	 * teacher can see what they are removing from the whole collection; this is
+	 * here to undo an abandoned creation. Without a library URL it does not
+	 * render either: discarding the game being edited with nowhere to go would
+	 * leave the teacher on a page about a game that no longer exists.
+	 */
+	?>
+	<?php if ( $game_id && 'draft' === $status && '' !== $tbtmg_library_url ) : ?>
+		<div class="tbtmg-actions tbtmg-actions--discard" data-tbtmg-discard-row>
+			<button type="button" class="tbtmg-button tbtmg-button--danger" data-tbtmg-discard><?php esc_html_e( 'Discard game', 'tbt-matching-games' ); ?></button>
+			<span class="tbtmg-status" data-tbtmg-discard-status role="status" aria-live="polite"></span>
+		</div>
+	<?php endif; ?>
 
 	<script type="application/json" data-tbtmg-initial-pairs><?php echo wp_json_encode( $game_id ? array_values( $data['pairs'] ) : array(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></script>
 </div>
