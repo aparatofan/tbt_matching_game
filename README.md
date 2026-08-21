@@ -150,12 +150,21 @@ the page is opened with `?game_id=123`, which is what the library's Edit links d
 
 The two surfaces are designed to live on separate pages: the library is a catalogue of what
 exists, the generator a workspace for one game. Each takes the other's URL as an attribute,
-so the arrangement is set by editing the Divi pages rather than by editing PHP:
+so the arrangement is set by editing the Divi pages rather than by editing PHP.
+
+**On two pages the attributes are required.** A bare `[tbt_matching_games]` on a page of its
+own has no way to know where the generator lives, so Create new does not render at all. Set
+both:
 
 ```text
 On the library page:    [tbt_matching_games hero="yes" generator="/create-a-game/"]
 On the generator page:  [tbt_matching_generator library="/my-games/"]
 ```
+
+Substitute your own page paths. Using the plugin's own example, a site with the generator at
+`https://example.com/make-a-game/` and the library at `https://example.com/my-games/` sets
+`generator="/make-a-game/"` on the library page and `library="/my-games/"` on the generator
+page — each names the *other* page, never itself.
 
 `generator="…"` is where the library's **Create new** and per-row **Edit** send the teacher.
 `library="…"` is where the generator's **Back to library** link and a completed **Discard
@@ -163,11 +172,17 @@ game** send them back. Both accept an absolute URL or a site-root-relative path;
 else is ignored. A generator URL that already carries a query string keeps it — `game_id` is
 appended rather than substituted.
 
-**Omitting both attributes preserves the single-page behaviour exactly.** With no
-`generator` set, Edit and Create new point at the current page, which is correct when both
-shortcodes share one; with no `library` set, neither the back link nor Discard game renders,
-because there is nowhere for them to go and browser history is not a substitute. Nothing has
-to change on an existing installation. `tbt_matching_games_generator_url` still overrides
+**Omitting both attributes preserves the single-page behaviour exactly.** On a page holding
+both shortcodes, Edit and Create new point at that page, which is correct; with no `library`
+set, neither the back link nor Discard game renders, because there is nowhere for them to go
+and browser history is not a substitute. Nothing has to change on an existing installation.
+
+That current-page fallback applies only where it can be right. When the page holds
+`[tbt_matching_games]` and no generator, no generator URL resolves, so Create new is not
+offered — a button that returned the teacher to the catalogue they clicked it from would be
+worse than no button. The check reads `post_content`; a page assembled somewhere the plugin
+cannot read it, such as a Divi Library layout or a Theme Builder template, keeps the
+fallback rather than losing a working button to a guess. `tbt_matching_games_generator_url` still overrides
 the generator URL for anyone already filtering it: it is applied last, over whatever the
 attribute resolved to.
 
@@ -230,7 +245,8 @@ characters with a live count of what is left, because that cap is what the playe
 hold rather than an arbitrary limit. The dialog traps focus, cancels on `Esc` or a click on
 the backdrop, and returns focus to the button that opened it; a failed create leaves the
 teacher in the dialog with the error rather than on a blank generator page. The button does
-not render when no generator URL resolves, since there would be nowhere to land.
+not render when no generator URL resolves, since there would be nowhere to land — on two
+pages, that means setting `generator="…"`.
 
 The CEFR level stays in Stage 1 of the generator, where the Generate button consumes it. It
 is a generation parameter, not part of naming the game.
