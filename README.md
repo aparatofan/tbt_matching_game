@@ -190,6 +190,12 @@ makes; content the teacher authors is set in Roboto Slab and interface chrome in
 pagination, and per-row Edit, Share, Duplicate and Delete. Share shows the public link, a QR
 code rendered as the panel opens, and the embed shortcode.
 
+Search covers both the game title and its topic, and is case-insensitive without losing
+diacritics — a search for `Ćwiczenie` and one for `ćwiczenie` return the same games. Beside
+the search field, a level filter narrows the list to one CEFR band, or to `Not set` for the
+games made before the level picker existed. Search and filter combine, and either one resets
+the list to page 1.
+
 Access requires the `tbt_use_teaching_tools` capability, granted on activation to the
 administrator role and to every role listed in TBT Swipe's `tbt_swipe_manager_roles`
 option. A user holding Swipe's own `tbts_manage` capability is also allowed, so a teacher
@@ -222,7 +228,7 @@ are scoped to the games the current user owns. An administrator may pass `author
 | Method | Route | Purpose |
 |---|---|---|
 | POST | `/generate` | Generate content without saving it (`topic`, `pair_count`, `additional_instructions`, `level`) |
-| GET | `/games` | List own games (`search`, `page`, `per_page`, `status`) |
+| GET | `/games` | List own games (`search`, `level`, `page`, `per_page`, `status`) |
 | POST | `/games` | Create |
 | GET | `/games/{id}` | Read one |
 | PUT | `/games/{id}` | Update |
@@ -279,6 +285,22 @@ The plugin fallback template remains available when no override exists.
 - Generated game text is stored and rendered as plain text, not HTML.
 - AI generation is capped per user per day (20 by default), counted only on success.
 - Draft and private games are not rendered publicly.
+
+### Derived search index
+
+Library search and the level filter read two flat post meta keys, written only by
+`Search_Index`:
+
+| Key | Contents |
+|---|---|
+| `_tbtmg_level` | The CEFR band, or `''` for a game with no level |
+| `_tbtmg_search` | The lowercased title and topic, space-joined |
+
+They exist because `meta_query` cannot reach inside `_tbtmg_game_data`, which is a single
+serialised array. They are a derived index and never a source of truth: `_tbtmg_game_data`
+remains canonical and every read goes through `Game_Repository::get()`. The index is
+rewritten on every save and on duplication, and an install that predates it is filled in
+batches on `admin_init` until the `tbtmg_index_version` option catches up.
 
 ## Uninstalling
 

@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.6.0 — 2026-08-21
+
+- Library search now finds a game by its topic, not only its title. The
+  placeholder has promised "Title or topic" since the field was added, but the
+  search ran through `WP_Query`'s `s` parameter, which reaches `post_title` and
+  nothing else — topic lives inside `_tbtmg_game_data`, a single serialised
+  array that `meta_query` cannot see into. The promise now holds.
+- Two flat meta keys make the blob queryable. `_tbtmg_search` holds the
+  lowercased title and topic; `_tbtmg_level` holds the CEFR band. They are a
+  derived index written only by `Search_Index` — `_tbtmg_game_data` stays
+  canonical, and every read still goes through `Game_Repository::get()`.
+- The index is lowercased rather than transliterated, and the search term is
+  lowercased the same way, so matching is case-insensitive without depending on
+  the database collation and a Polish topic keeps its diacritics: `ćwiczenie`
+  stays `ćwiczenie` and is found by typing it.
+- Existing games are indexed in batches of 100 on `admin_init`, drafts and
+  trashed games included, until a pass finds nothing left to do. A large library
+  finishes over several admin page loads instead of timing out on one. This is
+  an index, not a schema change: there is no database version to bump.
+- A level filter sits beside the search field: All levels, the six bands, and
+  Not set. A game made before the level picker existed has no level and keeps
+  saying so — nothing is inferred from its pairs or its topic — so Not set
+  returns exactly those games. Filter and search combine, and either resets the
+  list to the first page.
+- Library rows show the band as a chip beside the status badge. It is neutral
+  rather than blue: the level is a fact about the game, and blue belongs to
+  things a teacher can act on. An unlevelled game shows no chip at all.
+
 ## 0.5.0 — 2026-08-21
 
 - Stage 1 now asks how hard the language should be. Six CEFR tiles, A1 to C2,

@@ -103,6 +103,10 @@ final class Game_Repository {
 		update_post_meta( $post_id, self::META_KEY, $validated );
 		$this->request_cache[ $post_id ] = array_merge( $validated, array( 'title' => $title ) );
 
+		// The index is derived from what was just stored, title included, so it
+		// is rewritten on the same pass rather than left to drift.
+		Search_Index::update( $post_id, $this->request_cache[ $post_id ] );
+
 		return $this->request_cache[ $post_id ];
 	}
 
@@ -124,6 +128,8 @@ final class Game_Repository {
 
 		update_post_meta( $post_id, self::META_KEY, $sanitised );
 		$this->request_cache[ $post_id ] = array_merge( $sanitised, array( 'title' => $title ) );
+
+		Search_Index::update( $post_id, $this->request_cache[ $post_id ] );
 
 		return $this->request_cache[ $post_id ];
 	}

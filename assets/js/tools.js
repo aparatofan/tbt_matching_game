@@ -532,7 +532,8 @@
 		var list = root.querySelector('[data-tbtmg-list]');
 		var pagination = root.querySelector('[data-tbtmg-pagination]');
 		var search = root.querySelector('[data-tbtmg-search]');
-		var state = { page: 1, search: '', totalPages: 1 };
+		var levelFilter = root.querySelector('[data-tbtmg-level-filter]');
+		var state = { page: 1, search: '', level: '', totalPages: 1 };
 		var searchTimer = null;
 
 		function editUrl(game) {
@@ -553,8 +554,14 @@
 			);
 
 			main.append(el('h3', 'tbtmg-game-row__title', game.title));
+			meta.append(badge);
+
+			// An unlevelled game says nothing rather than wearing an empty chip.
+			if (game.level) {
+				meta.append(el('span', 'tbtmg-badge tbtmg-badge--level', game.level));
+			}
+
 			meta.append(
-				badge,
 				el('span', 'tbtmg-game-row__pairs', sprintf(t('pairCount'), [game.pair_count, config.minPairs, config.maxPairs])),
 				el('span', 'tbtmg-game-row__date', sprintf(t('modified'), [formatDate(game.modified)]))
 			);
@@ -663,7 +670,8 @@
 			list.setAttribute('aria-busy', 'true');
 			list.replaceChildren(el('p', 'tbtmg-hint', t('loading')));
 
-			var url = config.restBase + '?page=' + state.page + '&per_page=20&search=' + encodeURIComponent(state.search);
+			var url = config.restBase + '?page=' + state.page + '&per_page=20&search=' + encodeURIComponent(state.search) +
+				'&level=' + encodeURIComponent(state.level);
 
 			request(url).then(function (response) {
 				var items = response.items || [];
@@ -679,7 +687,7 @@
 
 				list.replaceChildren();
 				if (!items.length) {
-					list.append(el('p', 'tbtmg-hint', state.search ? t('emptySearch') : t('empty')));
+					list.append(el('p', 'tbtmg-hint', state.search || state.level ? t('emptySearch') : t('empty')));
 				} else {
 					items.forEach(function (game) {
 						list.append(row(game));
@@ -703,6 +711,15 @@
 					state.page = 1;
 					load();
 				}, 300);
+			});
+		}
+
+		if (levelFilter) {
+			// A select fires once per choice, so there is nothing to debounce.
+			levelFilter.addEventListener('change', function () {
+				state.level = levelFilter.value;
+				state.page = 1;
+				load();
 			});
 		}
 
