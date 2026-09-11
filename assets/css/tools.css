@@ -673,14 +673,6 @@ body {
 
 /* ---------- Library — object cards (Style Book §4) ---------- */
 
-/* Section head, mirroring the Swipe library: title plus a quiet rule. */
-.tbtmg-section-head {
-	display: flex;
-	gap: 16px;
-	align-items: center;
-	margin-bottom: 24px;
-}
-
 .tbtmg-section-title {
 	color: var(--tbt-blue);
 	font-family: var(--tbt-font-content);
@@ -695,57 +687,200 @@ body {
 	background: var(--tbt-border);
 }
 
-/*
- * Search takes the width it can get; the level filter takes only what it
- * needs. Below 600px they stack, so neither is squeezed on a phone.
- */
-.tbtmg-library__head {
+/* ---------- Library toolbar (0.8.0) — Appendix A pattern, Swipe 1.15.0 geometry ---------- */
+
+.tbtmg-libbar {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 16px;
-	align-items: flex-end;
+	align-items: center;
+	justify-content: space-between;
 	margin-bottom: 24px;
 }
 
-.tbtmg-library__head .tbtmg-field {
-	margin-bottom: 0;
+.tbtmg-libbar__title {
+	display: flex;
+	gap: 16px;
+	align-items: center;
+	flex: 0 0 auto;
 }
 
-.tbtmg-library__head .tbtmg-field--search {
-	flex: 1 1 240px;
+/* Empty library: the title and its rule take the row, the CTA closes it. */
+.tbtmg-libbar.is-empty .tbtmg-libbar__title {
+	flex: 1 1 260px;
+}
+
+.tbtmg-libbar__filter {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	flex: 1 1 480px;
 	min-width: 0;
 }
 
-.tbtmg-library__head .tbtmg-field--level {
-	flex: 0 0 auto;
+.tbtmg-libbar__search {
+	position: relative;
+	flex: 1 1 320px;
+	min-width: 0;
 }
 
-.tbtmg-library__head .tbtmg-field--level select {
+.tbtmg-libbar__icon {
+	position: absolute;
+	top: 50%;
+	left: 16px;
+	transform: translateY(-50%);
+	color: var(--tbt-blue);
+	pointer-events: none;
+}
+
+.tbtmg-libbar__input,
+.tbtmg-libbar__select {
+	display: block;
+	width: 100%;
+	min-width: 0;
+	padding: 13px 16px;
+	border: 1.5px solid var(--tbt-border);
+	border-radius: var(--tbt-radius-control);
+	background-color: var(--tbt-input);
+	color: var(--tbt-ink);
+	font-family: var(--tbt-font-ui);
+	font-size: 16px;
+	line-height: 1.4;
+	transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease;
+}
+
+.tbtmg-libbar__input {
+	padding-left: 46px;
+	padding-right: 44px;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.tbtmg-libbar__input::-webkit-search-cancel-button,
+.tbtmg-libbar__input::-webkit-search-decoration {
+	display: none;
+	-webkit-appearance: none;
+}
+
+.tbtmg-libbar__input::placeholder {
+	color: var(--tbt-muted);
+}
+
+.tbtmg-libbar__input:hover,
+.tbtmg-libbar__select:hover {
+	/* Swipe's periwinkle, built from tokens. */
+	border-color: color-mix(in srgb, var(--tbt-blue) 50%, var(--tbt-border));
+}
+
+.tbtmg-libbar__input:focus,
+.tbtmg-libbar__select:focus {
+	border-color: var(--tbt-blue);
+	background-color: var(--tbt-surface);
+	box-shadow: var(--tbt-focus-ring);
+	outline: none;
+}
+
+.tbtmg-libbar__select {
+	flex: 0 1 300px;
 	width: auto;
 	min-width: 200px;
-	min-height: 44px;
+	padding-right: 48px;
+	-webkit-appearance: none;
+	appearance: none;
+	cursor: pointer;
+	/* The one literal colour: a data URI cannot read a custom property. Brand blue. */
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5 6 6.5l5-5' stroke='%230856C9' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 16px center;
 }
 
-/* Create new closes the row: the filters narrow what is there, this adds to it. */
-.tbtmg-library__create {
+/* A chosen level reads as a selection. */
+.tbtmg-libbar__select.is-set {
+	border-color: var(--tbt-blue);
+	background-color: var(--tbt-selected-bg);
+}
+
+.tbtmg-libbar__clear {
+	position: absolute;
+	top: 50%;
+	right: 8px;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	color: var(--tbt-muted);
+	font-size: 20px;
+	line-height: 1;
+	cursor: pointer;
+	transform: translateY(-50%);
+}
+
+.tbtmg-libbar__clear:hover {
+	background: var(--tbt-selected-bg);
+	color: var(--tbt-blue);
+}
+
+.tbtmg-libbar__clear:focus-visible {
+	box-shadow: var(--tbt-focus-ring);
+	outline: none;
+}
+
+.tbtmg-libbar__cta {
 	flex: 0 0 auto;
-	margin-left: auto;
 }
 
-@media (max-width: 600px) {
-	.tbtmg-library__head {
-		flex-direction: column;
-		align-items: stretch;
+.tbtmg-libbar__summary {
+	margin: -8px 0 24px;
+	color: var(--tbt-muted);
+	font-family: var(--tbt-font-ui);
+	font-size: 15px;
+}
+
+.tbtmg-libbar__link {
+	margin-left: 8px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--tbt-blue);
+	font: inherit;
+	font-weight: 600;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	cursor: pointer;
+}
+
+.tbtmg-libbar__link:focus-visible {
+	border-radius: 2px;
+	outline: 2px solid var(--tbt-blue);
+	outline-offset: 2px;
+}
+
+.tbtmg-sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+/* Title and Create share the first line; search and level take a full second line. */
+@media (max-width: 900px) {
+	.tbtmg-libbar__filter {
+		order: 3;
+		flex-basis: 100%;
+	}
+}
+
+@media (max-width: 580px) {
+	.tbtmg-libbar__filter {
+		flex-wrap: wrap;
 	}
 
-	.tbtmg-library__head .tbtmg-field--level select {
-		width: 100%;
-		min-width: 0;
-	}
-
-	/* Stacked, auto would push the button off the right edge of the column. */
-	.tbtmg-library__create {
-		margin-left: 0;
+	.tbtmg-libbar__select {
+		flex-basis: 100%;
 	}
 }
 

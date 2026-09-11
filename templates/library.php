@@ -5,7 +5,7 @@
  * Rows are rendered by tools.js from GET /games so search, pagination and the
  * row actions all read from one owner-scoped source of truth.
  *
- * Available variables: $hero, $generator_url.
+ * Available variables: $hero, $generator_url, $total.
  *
  * @package TBT_Matching_Games
  */
@@ -24,31 +24,41 @@ $tbtmg_uid = 'tbtmg-lib-' . wp_unique_id();
  * libraries on one page may point at different generators.
  */
 $tbtmg_generator_url = isset( $generator_url ) ? (string) $generator_url : '';
+
+/*
+ * The owner's game count decides the first paint: an empty library shows its
+ * title and the Create button alone, rather than flashing a search bar that has
+ * nothing to search.
+ */
+$tbtmg_total = isset( $total ) ? (int) $total : 0;
+$tbtmg_empty = 0 === $tbtmg_total;
 ?>
 <div class="tbt tbt-tool tbtmg-tool tbtmg-library" data-tbtmg-tool="library" data-tbtmg-generator-url="<?php echo esc_url( $tbtmg_generator_url ); ?>">
 
 	<?php require TBTMG_DIR . 'templates/tool-hero.php'; ?>
 
-	<div class="tbtmg-section-head">
-		<h2 class="tbtmg-section-title"><?php esc_html_e( 'Your games', 'tbt-matching-games' ); ?></h2>
-		<span class="tbtmg-section-rule" aria-hidden="true"></span>
-	</div>
-
-	<div class="tbtmg-library__head">
-		<div class="tbtmg-field tbtmg-field--search">
-			<label for="<?php echo esc_attr( $tbtmg_uid ); ?>-search"><?php esc_html_e( 'Search your games', 'tbt-matching-games' ); ?></label>
-			<input
-				type="search"
-				id="<?php echo esc_attr( $tbtmg_uid ); ?>-search"
-				data-tbtmg-search
-				placeholder="<?php esc_attr_e( 'Title or topic', 'tbt-matching-games' ); ?>"
-				autocomplete="off"
-			>
+	<div class="tbtmg-libbar<?php echo $tbtmg_empty ? ' is-empty' : ''; ?>" data-tbtmg-libbar data-tbtmg-total="<?php echo esc_attr( (string) $tbtmg_total ); ?>">
+		<div class="tbtmg-libbar__title">
+			<h2 class="tbtmg-section-title"><?php esc_html_e( 'Your games', 'tbt-matching-games' ); ?></h2>
+			<span class="tbtmg-section-rule" data-tbtmg-libbar-rule aria-hidden="true"<?php echo $tbtmg_empty ? '' : ' hidden'; ?>></span>
 		</div>
 
-		<div class="tbtmg-field tbtmg-field--level">
-			<label for="<?php echo esc_attr( $tbtmg_uid ); ?>-level"><?php esc_html_e( 'Level', 'tbt-matching-games' ); ?></label>
-			<select id="<?php echo esc_attr( $tbtmg_uid ); ?>-level" data-tbtmg-level-filter>
+		<div class="tbtmg-libbar__filter" role="search" data-tbtmg-libbar-filter<?php echo $tbtmg_empty ? ' hidden' : ''; ?>>
+			<div class="tbtmg-libbar__search">
+				<label class="tbtmg-sr" for="<?php echo esc_attr( $tbtmg_uid ); ?>-search"><?php esc_html_e( 'Search your games', 'tbt-matching-games' ); ?></label>
+				<svg class="tbtmg-libbar__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+					<circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.2"/>
+					<path d="m20 20-3.6-3.6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+				</svg>
+				<input type="search" id="<?php echo esc_attr( $tbtmg_uid ); ?>-search" class="tbtmg-libbar__input" data-tbtmg-search
+					placeholder="<?php esc_attr_e( 'Search by game or topic', 'tbt-matching-games' ); ?>"
+					autocomplete="off" spellcheck="false">
+				<button type="button" class="tbtmg-libbar__clear" data-tbtmg-search-clear
+					aria-label="<?php esc_attr_e( 'Clear search', 'tbt-matching-games' ); ?>" hidden>&times;</button>
+			</div>
+
+			<label class="tbtmg-sr" for="<?php echo esc_attr( $tbtmg_uid ); ?>-level"><?php esc_html_e( 'Level', 'tbt-matching-games' ); ?></label>
+			<select id="<?php echo esc_attr( $tbtmg_uid ); ?>-level" class="tbtmg-libbar__select" data-tbtmg-level-filter>
 				<option value=""><?php esc_html_e( 'All levels', 'tbt-matching-games' ); ?></option>
 				<?php foreach ( Levels::band_names() as $tbtmg_band => $tbtmg_band_name ) : ?>
 					<?php
@@ -73,11 +83,16 @@ $tbtmg_generator_url = isset( $generator_url ) ? (string) $generator_url : '';
 		 */
 		?>
 		<?php if ( '' !== $tbtmg_generator_url ) : ?>
-			<button type="button" class="tbtmg-button tbtmg-button--primary tbtmg-library__create" data-tbtmg-create>
-				<?php esc_html_e( 'Create new', 'tbt-matching-games' ); ?>
+			<button type="button" class="tbtmg-button tbtmg-button--primary tbtmg-button--large tbtmg-libbar__cta" data-tbtmg-create>
+				<?php esc_html_e( 'Create new game', 'tbt-matching-games' ); ?>
 			</button>
 		<?php endif; ?>
 	</div>
+
+	<p class="tbtmg-libbar__summary" data-tbtmg-summary aria-live="polite" hidden>
+		<span data-tbtmg-summary-text></span>
+		<button type="button" class="tbtmg-libbar__link" data-tbtmg-reset><?php esc_html_e( 'Clear filters', 'tbt-matching-games' ); ?></button>
+	</p>
 
 	<div class="tbtmg-notice" data-tbtmg-notice role="status" aria-live="polite" hidden></div>
 

@@ -761,6 +761,12 @@
 		var search = root.querySelector('[data-tbtmg-search]');
 		var levelFilter = root.querySelector('[data-tbtmg-level-filter]');
 		var createButton = root.querySelector('[data-tbtmg-create]');
+		var libbar = root.querySelector('[data-tbtmg-libbar]');
+		var libbarFilter = root.querySelector('[data-tbtmg-libbar-filter]');
+		var libbarRule = root.querySelector('[data-tbtmg-libbar-rule]');
+		var searchClear = root.querySelector('[data-tbtmg-search-clear]');
+		var summary = root.querySelector('[data-tbtmg-summary]');
+		var summaryText = root.querySelector('[data-tbtmg-summary-text]');
 		/*
 		 * The generator URL travels on the markup rather than in config: the
 		 * bundle is localised once, before any shortcode has run, so a
@@ -769,8 +775,79 @@
 		 * is what a page with no attributes set has always used.
 		 */
 		var generatorUrl = root.getAttribute('data-tbtmg-generator-url') || config.generatorUrl || '';
-		var state = { page: 1, search: '', level: '', totalPages: 1 };
+		/*
+		 * allTotal is the library's own size, which the summary counts against.
+		 * The server seeds it so the first paint is right; every unfiltered load
+		 * refreshes it afterwards.
+		 */
+		var state = {
+			page: 1,
+			search: '',
+			level: '',
+			totalPages: 1,
+			allTotal: parseInt(libbar ? libbar.getAttribute('data-tbtmg-total') : '', 10) || 0
+		};
 		var searchTimer = null;
+
+		function filtering() {
+			return state.search !== '' || state.level !== '';
+		}
+
+		/*
+		 * An empty library has nothing to search, so it shows its title, the
+		 * rule and the Create button alone.
+		 */
+		function setEmpty(flag) {
+			if (libbar) {
+				libbar.classList.toggle('is-empty', flag);
+			}
+			if (libbarFilter) {
+				libbarFilter.hidden = flag;
+			}
+			if (libbarRule) {
+				libbarRule.hidden = !flag;
+			}
+		}
+
+		function resetButton() {
+			var button = el('button', 'tbtmg-libbar__link', t('clearFilters'));
+			button.type = 'button';
+			button.setAttribute('data-tbtmg-reset', '');
+			return button;
+		}
+
+		function renderSummary(shown) {
+			if (!summary || !summaryText) {
+				return;
+			}
+
+			if (!filtering()) {
+				summary.hidden = true;
+				return;
+			}
+
+			summaryText.textContent = sprintf(t('filterOf'), [
+				shown,
+				state.allTotal,
+				state.allTotal === 1 ? t('gameOne') : t('gameMany')
+			]);
+			summary.hidden = false;
+		}
+
+		function syncClear() {
+			if (searchClear && search) {
+				searchClear.hidden = search.value === '';
+			}
+		}
+
+		// Used where the teacher has already made the choice explicit — the
+		// clear button, Escape, Clear filters — so there is nothing to wait for.
+		function runSearch() {
+			window.clearTimeout(searchTimer);
+			state.search = search ? search.value.trim() : '';
+			state.page = 1;
+			load();
+		}
 
 		function editUrl(game) {
 			return appendGameId(generatorUrl || window.location.href, game.id);
@@ -844,6 +921,8 @@
 				duplicateButton.disabled = true;
 				request(config.restBase + '/' + game.id + '/duplicate', { method: 'POST' }).then(function () {
 					notify(root, t('duplicated'));
+					// The copy is in the library whether or not this filter shows it.
+					state.allTotal += 1;
 					load();
 				}).catch(function (error) {
 					notify(root, messageFor(error), true);
@@ -858,6 +937,7 @@
 				deleteButton.disabled = true;
 				request(config.restBase + '/' + game.id, { method: 'DELETE' }).then(function () {
 					notify(root, t('deleted'));
+					state.allTotal = Math.max(0, state.allTotal - 1);
 					load();
 				}).catch(function (error) {
 					notify(root, messageFor(error), true);
@@ -910,6 +990,7 @@
 
 			request(url).then(function (response) {
 				var items = response.items || [];
+				var total = typeof response.total === 'number' ? response.total : items.length;
 				state.totalPages = response.total_pages || 1;
 
 				// A deletion can empty the last page; step back rather than
@@ -920,15 +1001,26 @@
 					return;
 				}
 
+				// An unfiltered load is the only honest measure of the library.
+				if (!filtering()) {
+					state.allTotal = total;
+					setEmpty(state.allTotal === 0);
+				}
+
 				list.replaceChildren();
 				if (!items.length) {
-					list.append(el('p', 'tbtmg-hint', state.search || state.level ? t('emptySearch') : t('empty')));
+					var hint = el('p', 'tbtmg-hint', filtering() ? t('emptySearch') : t('empty'));
+					if (filtering()) {
+						hint.append(resetButton());
+					}
+					list.append(hint);
 				} else {
 					items.forEach(function (game) {
 						list.append(row(game));
 					});
 				}
 
+				renderSummary(total);
 				renderPagination();
 			}).catch(function (error) {
 				list.replaceChildren();
@@ -940,6 +1032,8 @@
 
 		if (search) {
 			search.addEventListener('input', function () {
+				// The button tracks the field; only the round trip is debounced.
+				syncClear();
 				window.clearTimeout(searchTimer);
 				searchTimer = window.setTimeout(function () {
 					state.search = search.value.trim();
@@ -947,7 +1041,61 @@
 					load();
 				}, 300);
 			});
+
+			search.addEventListener('keydown', function (event) {
+				// With the field already empty, Escape belongs to whatever is
+				// listening further up — a Divi overlay, the browser.
+				if (event.key !== 'Escape' || search.value === '') {
+					return;
+				}
+
+				event.preventDefault();
+				search.value = '';
+				syncClear();
+				runSearch();
+			});
+
+			syncClear();
 		}
+
+		if (searchClear) {
+			searchClear.addEventListener('click', function () {
+				search.value = '';
+				syncClear();
+				runSearch();
+				search.focus();
+			});
+		}
+
+		/*
+		 * Delegated: one of these buttons sits in the summary line, another is
+		 * built into the no-matches hint on every load.
+		 */
+		root.addEventListener('click', function (event) {
+			var target = event.target;
+			if (!target || typeof target.closest !== 'function' || !target.closest('[data-tbtmg-reset]')) {
+				return;
+			}
+
+			if (search) {
+				search.value = '';
+				syncClear();
+			}
+			if (levelFilter) {
+				levelFilter.value = '';
+				levelFilter.classList.remove('is-set');
+			}
+
+			window.clearTimeout(searchTimer);
+			state.search = '';
+			state.level = '';
+			state.page = 1;
+			load();
+
+			if (search) {
+				search.focus();
+			}
+		});
 
 		/*
 		 * The button is only rendered when the server resolved a generator URL,
@@ -963,12 +1111,60 @@
 			// A select fires once per choice, so there is nothing to debounce.
 			levelFilter.addEventListener('change', function () {
 				state.level = levelFilter.value;
+				levelFilter.classList.toggle('is-set', state.level !== '');
 				state.page = 1;
 				load();
 			});
 		}
 
+		bindSearchShortcut();
 		load();
+	}
+
+	var slashBound = false;
+
+	/**
+	 * "/" focuses the first visible library search on the page.
+	 *
+	 * Bound once per page rather than once per library: two libraries on one
+	 * page would otherwise race to claim the same keystroke.
+	 */
+	function bindSearchShortcut() {
+		if (slashBound) {
+			return;
+		}
+		slashBound = true;
+
+		document.addEventListener('keydown', function (event) {
+			if (event.key !== '/' || event.ctrlKey || event.metaKey || event.altKey) {
+				return;
+			}
+
+			// The create dialog owns the keyboard while it is open.
+			if (document.querySelector('.tbtmg-modal')) {
+				return;
+			}
+
+			var active = document.activeElement;
+			if (active && (active.isContentEditable || /^(?:INPUT|TEXTAREA|SELECT)$/.test(active.tagName))) {
+				return;
+			}
+
+			// An empty library hides its search; there is nothing to focus.
+			var field = Array.prototype.filter.call(
+				document.querySelectorAll('[data-tbtmg-search]'),
+				function (node) {
+					return node.offsetParent !== null;
+				}
+			)[0];
+
+			if (!field) {
+				return;
+			}
+
+			event.preventDefault();
+			field.focus();
+		});
 	}
 
 	/**
