@@ -276,6 +276,11 @@ final class Assets {
 				'prevPage'        => __( 'Previous', 'tbt-matching-games' ),
 				'nextPage'        => __( 'Next', 'tbt-matching-games' ),
 				'pageOf'          => __( 'Page %1$d of %2$d', 'tbt-matching-games' ),
+				'clearFilters'    => __( 'Clear filters', 'tbt-matching-games' ),
+				/* translators: 1: games shown, 2: games in the library, 3: "game" or "games". */
+				'filterOf'        => __( '%1$d of %2$d %3$s', 'tbt-matching-games' ),
+				'gameOne'         => __( 'game', 'tbt-matching-games' ),
+				'gameMany'        => __( 'games', 'tbt-matching-games' ),
 			),
 		);
 	}

@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.8.0 — 2026-09-11
+
+- The library header is one row now: **Your games**, the search field, the level
+  filter and **Create new game**, in that order, the same shape Swipe has. The
+  stacked arrangement spent three rows saying what one can — a title, then two
+  labelled fields, then a button pushed to its own line — and the list itself
+  started halfway down the page.
+- The field labels are still there for a screen reader; on screen the search
+  field says what it does. It reads **Search by game or topic**, which is what
+  the index has always matched.
+- Clearing a search no longer means selecting the text and deleting it. A ×
+  appears in the field as soon as there is something to clear, Escape empties it
+  from the keyboard, and `/` puts the cursor in it from anywhere on the page —
+  except inside the create dialog, where `/` is just a slash.
+- While a search or a level is active the library says how much it is hiding:
+  **3 of 14 games**, with **Clear filters** beside it. Deleting or duplicating a
+  game while filtered keeps that second number honest.
+- A teacher with no games yet no longer gets a search bar for an empty library.
+  The count comes from the server, so the bar is absent from the first paint
+  rather than appearing and then vanishing.
+
 ## 0.7.1 — 2026-08-21
 
 - Fixed Create new sending a teacher back to the catalogue. On a library page
