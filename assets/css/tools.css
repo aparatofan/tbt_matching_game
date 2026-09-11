@@ -679,6 +679,9 @@ body {
 	font-size: 28px;
 	font-weight: 700;
 	line-height: 1.2;
+	/* Divi uppercases headings site-wide; the Admin Bar title is sentence case. */
+	text-transform: none !important;
+	letter-spacing: -.01em;
 }
 
 /* ---------- Admin Bar v2 (0.8.1) — TBT pattern, as Students 0.4.1 ---------- */
