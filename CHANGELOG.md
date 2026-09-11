@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.8.1 — 2026-09-11
+
+- The library header takes the shared Admin Bar layout: a thin line runs through
+  the row from **Your games** to **Create new game**, and the search field, the
+  level filter and the button are fixed at 300, 300 and 250px. The bar now lines
+  up with the same row in the other tools instead of being sized by whatever the
+  page gave it. The button lost its drop shadow, at rest and on hover.
+- Below about 1100px the lines step aside and the search and level move to a
+  second line, as before.
+- An administrator opening an empty library no longer sees the empty state when
+  there are games to show: the check that decides the first paint now counts the
+  same games the list itself will load, which for an administrator is every
+  teacher's, not only their own.
+- Two internal names tidied: the visually-hidden label class is
+  `.tbtmg-sr-only` everywhere now, matching the player's stylesheet, and a
+  comment in the games controller quotes the search placeholder as it actually
+  reads.
+
 ## 0.8.0 — 2026-09-11
 
 - The library header is one row now: **Your games**, the search field, the level

@@ -763,7 +763,6 @@
 		var createButton = root.querySelector('[data-tbtmg-create]');
 		var libbar = root.querySelector('[data-tbtmg-libbar]');
 		var libbarFilter = root.querySelector('[data-tbtmg-libbar-filter]');
-		var libbarRule = root.querySelector('[data-tbtmg-libbar-rule]');
 		var searchClear = root.querySelector('[data-tbtmg-search-clear]');
 		var summary = root.querySelector('[data-tbtmg-summary]');
 		var summaryText = root.querySelector('[data-tbtmg-summary-text]');
@@ -794,8 +793,8 @@
 		}
 
 		/*
-		 * An empty library has nothing to search, so it shows its title, the
-		 * rule and the Create button alone.
+		 * An empty library has nothing to search, so it shows its title and the
+		 * Create button alone. The bar's joining lines are CSS-only.
 		 */
 		function setEmpty(flag) {
 			if (libbar) {
@@ -803,9 +802,6 @@
 			}
 			if (libbarFilter) {
 				libbarFilter.hidden = flag;
-			}
-			if (libbarRule) {
-				libbarRule.hidden = !flag;
 			}
 		}
 
