@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.2 — 2026-09-11
+
+- The library title reads **Your games** again, not **YOUR GAMES**: the theme
+  uppercases headings site-wide and the Admin Bar title now opts out.
+
 ## 0.8.1 — 2026-09-11
 
 - The library header takes the shared Admin Bar layout: a thin line runs through
