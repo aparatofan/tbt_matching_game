@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.7.1 — 2026-08-21
+
+- Fixed Create new sending a teacher back to the catalogue. On a library page
+  that does not also hold the generator, the current-page fallback resolved to
+  the library itself, so naming a game created the draft and then reloaded the
+  page it was started from. The generator never opened, and the teacher was
+  left looking at a pairless draft they appeared not to have asked for.
+- The current-page fallback is now withheld when the page demonstrably has no
+  generator on it, which is what 0.7.0 already promised: with no generator URL
+  resolved, Create new does not render rather than rendering a button that goes
+  nowhere useful. **A two-page arrangement needs the `generator` and `library`
+  attributes set** — see the README. Nothing about a shared page changes.
+- The absence of a generator is only trusted when the library shortcode is
+  visible in the same `post_content`, which is what proves that content
+  produced the page. A page assembled where the plugin cannot read it — a Divi
+  Library layout, a Theme Builder template — keeps the old fallback rather than
+  losing a working button to a guess.
+
 ## 0.7.0 — 2026-08-21
 
 - The library and the generator are meant to live on two pages now. Sharing one

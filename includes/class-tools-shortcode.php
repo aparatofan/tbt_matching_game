@@ -176,7 +176,7 @@ final class Tools_Shortcode {
 
 		if ( '' === $default ) {
 			$post = get_post();
-			if ( $post instanceof \WP_Post ) {
+			if ( $post instanceof \WP_Post && self::generator_may_be_here( $post ) ) {
 				$default = (string) get_permalink( $post );
 			}
 		}
@@ -187,11 +187,38 @@ final class Tools_Shortcode {
 		 * Applied last, over whatever the generator="…" attribute resolved to,
 		 * so a site that already overrides this keeps winning. With no
 		 * attribute and no filter the default is the current page, which is
-		 * right when both shortcodes share one.
+		 * right when both shortcodes share one and is withheld when they
+		 * demonstrably do not.
 		 *
 		 * @param string $url Generator page URL.
 		 */
 		return (string) apply_filters( 'tbt_matching_games_generator_url', $default );
+	}
+
+	/**
+	 * May the current page stand in for the generator page?
+	 *
+	 * The current-page default exists for the shared page, where it is right.
+	 * On a library page that does not hold the generator it is wrong, and
+	 * wrong silently: Create new would name the page it was clicked on, so a
+	 * teacher would fill in a title, watch the catalogue reload, and find a
+	 * pairless draft they never asked for.
+	 *
+	 * The negative is only trusted when the library shortcode is visible in
+	 * the same content, which is what proves post_content produced this
+	 * render. A page assembled somewhere this cannot read — a Divi Library
+	 * layout, a Theme Builder template — says nothing either way, and guessing
+	 * there would take away a button that works.
+	 *
+	 * @param \WP_Post $post Current post.
+	 * @return bool
+	 */
+	private static function generator_may_be_here( \WP_Post $post ): bool {
+		if ( has_shortcode( $post->post_content, self::GENERATOR_SHORTCODE ) ) {
+			return true;
+		}
+
+		return ! has_shortcode( $post->post_content, self::LIBRARY_SHORTCODE );
 	}
 
 	/**
