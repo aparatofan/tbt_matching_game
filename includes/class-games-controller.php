@@ -202,7 +202,7 @@ final class Games_Controller {
 		/*
 		 * Not 's': a WP_Query search reaches post_title only, and topic lives
 		 * inside the serialised blob. Both are in the flat _tbtmg_search index
-		 * instead, so the placeholder's promise of "Title or topic" holds.
+		 * instead, so the placeholder's promise of "Search by game or topic" holds.
 		 */
 		$meta_query = array();
 

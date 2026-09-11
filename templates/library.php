@@ -40,12 +40,12 @@ $tbtmg_empty = 0 === $tbtmg_total;
 	<div class="tbtmg-libbar<?php echo $tbtmg_empty ? ' is-empty' : ''; ?>" data-tbtmg-libbar data-tbtmg-total="<?php echo esc_attr( (string) $tbtmg_total ); ?>">
 		<div class="tbtmg-libbar__title">
 			<h2 class="tbtmg-section-title"><?php esc_html_e( 'Your games', 'tbt-matching-games' ); ?></h2>
-			<span class="tbtmg-section-rule" data-tbtmg-libbar-rule aria-hidden="true"<?php echo $tbtmg_empty ? '' : ' hidden'; ?>></span>
+			<span class="tbtmg-libbar__line" aria-hidden="true"></span>
 		</div>
 
 		<div class="tbtmg-libbar__filter" role="search" data-tbtmg-libbar-filter<?php echo $tbtmg_empty ? ' hidden' : ''; ?>>
 			<div class="tbtmg-libbar__search">
-				<label class="tbtmg-sr" for="<?php echo esc_attr( $tbtmg_uid ); ?>-search"><?php esc_html_e( 'Search your games', 'tbt-matching-games' ); ?></label>
+				<label class="tbtmg-sr-only" for="<?php echo esc_attr( $tbtmg_uid ); ?>-search"><?php esc_html_e( 'Search your games', 'tbt-matching-games' ); ?></label>
 				<svg class="tbtmg-libbar__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
 					<circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.2"/>
 					<path d="m20 20-3.6-3.6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
@@ -57,7 +57,9 @@ $tbtmg_empty = 0 === $tbtmg_total;
 					aria-label="<?php esc_attr_e( 'Clear search', 'tbt-matching-games' ); ?>" hidden>&times;</button>
 			</div>
 
-			<label class="tbtmg-sr" for="<?php echo esc_attr( $tbtmg_uid ); ?>-level"><?php esc_html_e( 'Level', 'tbt-matching-games' ); ?></label>
+			<span class="tbtmg-libbar__line" aria-hidden="true"></span>
+
+			<label class="tbtmg-sr-only" for="<?php echo esc_attr( $tbtmg_uid ); ?>-level"><?php esc_html_e( 'Level', 'tbt-matching-games' ); ?></label>
 			<select id="<?php echo esc_attr( $tbtmg_uid ); ?>-level" class="tbtmg-libbar__select" data-tbtmg-level-filter>
 				<option value=""><?php esc_html_e( 'All levels', 'tbt-matching-games' ); ?></option>
 				<?php foreach ( Levels::band_names() as $tbtmg_band => $tbtmg_band_name ) : ?>
@@ -74,6 +76,8 @@ $tbtmg_empty = 0 === $tbtmg_total;
 				<option value="none"><?php esc_html_e( 'Not set', 'tbt-matching-games' ); ?></option>
 			</select>
 		</div>
+
+		<span class="tbtmg-libbar__line tbtmg-libbar__line--end" aria-hidden="true"></span>
 
 		<?php
 		/*

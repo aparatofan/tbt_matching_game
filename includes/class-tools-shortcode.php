@@ -113,16 +113,23 @@ final class Tools_Shortcode {
 
 		$this->assets->enqueue_tools();
 
-		// The count decides the first paint, so an empty library does not flash its search bar.
-		$probe = new \WP_Query(
-			array(
-				'post_type'      => Post_Type::POST_TYPE,
-				'post_status'    => array( 'publish', 'draft' ),
-				'author'         => get_current_user_id(),
-				'posts_per_page' => 1,
-				'fields'         => 'ids',
-			)
+		/*
+		 * The count decides the first paint, so an empty library does not flash
+		 * its search bar. Same scope as Games_Controller::list_items(): an
+		 * administrator sees every teacher's games.
+		 */
+		$probe_args = array(
+			'post_type'      => Post_Type::POST_TYPE,
+			'post_status'    => array( 'publish', 'draft' ),
+			'posts_per_page' => 1,
+			'fields'         => 'ids',
 		);
+
+		if ( ! Access::can_view_all() ) {
+			$probe_args['author'] = get_current_user_id();
+		}
+
+		$probe = new \WP_Query( $probe_args );
 
 		return $this->template(
 			'library.php',
