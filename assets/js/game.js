@@ -3,6 +3,67 @@
 
 	let instanceCounter = 0;
 
+	/* ---- Reporting to the teacher's live panel ----
+
+	   Optional in every direction. TBT Notes owns the activity routes, and the
+	   game must keep working when Notes is not there, so the whole surface is
+	   gated on a base URL the server only supplies when Notes is active.
+
+	   Module level, not instance level, on purpose. A lesson page can carry
+	   several games, and a heartbeat per game would be several identical
+	   requests every twenty seconds saying the same thing about the same
+	   student. One page, one pulse. */
+
+	const PRESENCE_EVERY = 20000;
+	let presenceTimer = null;
+
+	function activityConfig() {
+		return (typeof window.TBTMGGame === 'object' && window.TBTMGGame) || {};
+	}
+
+	function postActivity(path, body) {
+		const cfg = activityConfig();
+		if (!cfg.activityBase || !cfg.activityNonce) {
+			return;
+		}
+
+		// Reporting is a side effect of playing, never a gate on it: a failed
+		// request is swallowed rather than shown. A student mid-lesson cannot act
+		// on "could not reach the progress panel".
+		fetch(cfg.activityBase + path, {
+			method: 'POST',
+			credentials: 'same-origin',
+			cache: 'no-store',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': cfg.activityNonce
+			},
+			body: JSON.stringify(body || {}),
+			// The completion fires as the result overlay opens, and a learner who
+			// closes the tab on it should still be recorded.
+			keepalive: true
+		}).catch(() => {});
+	}
+
+	/* The heartbeat says "still working" and writes no history — the server keeps
+	   it in a short-lived transient. It starts on the first interaction rather
+	   than on page load: a lesson page that merely contains a game must not mark
+	   every student in the room as working the moment the page paints. */
+	function startPresence() {
+		if (presenceTimer || !activityConfig().activityBase) {
+			return;
+		}
+		postActivity('/presence', {});
+		presenceTimer = window.setInterval(() => postActivity('/presence', {}), PRESENCE_EVERY);
+	}
+
+	function stopPresence() {
+		if (presenceTimer) {
+			window.clearInterval(presenceTimer);
+			presenceTimer = null;
+		}
+	}
+
 	class TBTMatchingGame {
 		constructor(container, config) {
 			this.container = container;
@@ -21,6 +82,14 @@
 			this.resetButton = container.querySelector('[data-tbtmg-reset]');
 			this.matchedIds = new Set();
 			this.attempts = 0;
+			/* Reporting state. completionSent is a once-per-page-load guard: Shuffle
+			   & restart can reach showResult() again, and a second row would tell the
+			   teacher a student finished twice. startedAt is set on the first
+			   interaction, not here, so a game sitting unopened on a lesson page is
+			   not timed. Neither is cleared by reset(): surviving a restart is the
+			   point. */
+			this.completionSent = false;
+			this.startedAt = 0;
 			this.selectedCard = null;
 			this.dragState = null;
 			this.suppressClick = false;
@@ -224,7 +293,44 @@
 			return card;
 		}
 
+		/* Called from the first card interaction of the sitting. Starts the clock
+		   and the heartbeat; both are no-ops on every later call. */
+		noteInteraction() {
+			if (!this.startedAt) {
+				this.startedAt = Date.now();
+			}
+			startPresence();
+		}
+
+		reportCompletion() {
+			if (this.completionSent) {
+				return;
+			}
+			this.completionSent = true;
+			stopPresence();
+
+			const activity = this.config.activity;
+			if (!activity || !activity.objectRef) {
+				return;
+			}
+
+			// No score. Every pair matched is the only way to reach this point, so
+			// n of n carries no information the event itself does not already give.
+			// Attempts is not a score and is not sent.
+			postActivity('', {
+				tool: 'matching',
+				object_ref: activity.objectRef,
+				object_title: activity.objectTitle,
+				post_id: activity.postId || 0,
+				duration_seconds: this.startedAt
+					? Math.max(0, Math.round((Date.now() - this.startedAt) / 1000))
+					: null
+			});
+		}
+
 		handleCardClick(event) {
+			this.noteInteraction();
+
 			if (this.suppressClick) {
 				event.preventDefault();
 				return;
@@ -339,6 +445,7 @@
 		}
 
 		showResult() {
+			this.reportCompletion();
 			this.resultSequence += 1;
 			const seq = this.resultSequence;
 			const completeText = this.config.labels.complete.replace('%d', String(this.attempts));
@@ -465,6 +572,8 @@
 		}
 
 		startPointerDrag(event) {
+			this.noteInteraction();
+
 			if (this.dragState) {
 				return;
 			}
