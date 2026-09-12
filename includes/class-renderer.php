@@ -74,6 +74,28 @@ final class Renderer {
 			),
 		);
 
+		/*
+		 * What the completion row will carry. object_ref is the game's own post ID
+		 * as a string — the activity table's column is a 64-character string shared
+		 * by every tool, and Swipe puts a deck slug in the same place.
+		 *
+		 * postId is the WP post the learner is looking at, which is the lesson when
+		 * the game is embedded and the game itself on a single-game page. Nothing
+		 * reads it yet; the column exists and filling it costs nothing.
+		 *
+		 * get_queried_object_id() answers for the main query, so it is the lesson
+		 * even when the shortcode runs inside a secondary loop. It is only asked on
+		 * a singular view: on an archive or a term listing the same call returns a
+		 * term or author ID, which would be a plausible-looking wrong post.
+		 */
+		$queried_id = is_singular() ? (int) get_queried_object_id() : 0;
+
+		$config['activity'] = array(
+			'objectRef'   => (string) $post_id,
+			'objectTitle' => (string) $data['title'],
+			'postId'      => ( $queried_id > 0 && $queried_id !== $post_id ) ? $queried_id : 0,
+		);
+
 		do_action( 'tbt_matching_games_before_render', $post_id, $data, $args );
 
 		ob_start();

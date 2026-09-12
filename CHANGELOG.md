@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.9.0 — 2026-09-12
+
+- Finishing a game now reports the completion to the teacher's Class Progress
+  panel, which turns that student green with the game's title. While a game is
+  being played the page also beats a presence signal, so the student reads as
+  working; the beat starts on the first card touched, not on page load, and
+  stops the moment the board is finished.
+- The reporting is optional in every direction. TBT Notes owns the routes and is
+  checked by class, not by plugin file: with Notes inactive the keys are absent,
+  nothing is sent, and the game behaves exactly as it did in 0.8.2. A failed
+  request is swallowed — reporting is a side effect of playing, never a gate on
+  it — and nothing sent identifies anybody, the server taking the user from the
+  session.
+- One page, one pulse: a lesson carrying several games beats once, not once per
+  game, and each game reports its own title when it is finished. **Shuffle &
+  restart** followed by a second finish does not report twice.
+
 ## 0.8.2 — 2026-09-11
 
 - The library title reads **Your games** again, not **YOUR GAMES**: the theme

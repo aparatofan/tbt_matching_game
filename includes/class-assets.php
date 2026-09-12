@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Assets {
 	private bool $registered = false;
 	private bool $tools_localised = false;
+	private bool $game_localised = false;
 
 	/**
 	 * Register hooks.
@@ -105,6 +106,35 @@ final class Assets {
 		$this->ensure_shared_styles();
 		wp_enqueue_style( 'tbtmg-game' );
 		wp_enqueue_script( 'tbtmg-game' );
+
+		/*
+		 * The live-progress routes belong to TBT Notes, which is an optional
+		 * integration: checked by class, not by plugin file. With Notes inactive
+		 * these keys are absent, the player reports nothing, and the game behaves
+		 * exactly as it did up to and including 0.8.2.
+		 *
+		 * The nonce is scoped to the learner's own completion — the route takes the
+		 * user from the session and resolves their class server-side — so the token
+		 * on a learner's page cannot be turned into a write about anyone else.
+		 *
+		 * The endpoint is page-level, so it is declared once. wp_localize_script()
+		 * prepends to the handle's existing data rather than replacing it, and
+		 * enqueue_game() runs again for every game rendered, so without the guard a
+		 * three-game lesson would print three identical declarations.
+		 */
+		if ( ! $this->game_localised ) {
+			$this->game_localised = true;
+
+			$activity = array();
+			if ( is_user_logged_in() && class_exists( 'TBT_Notes_Activity_REST' ) && defined( 'TBT_NOTES_REST_NAMESPACE' ) ) {
+				$activity = array(
+					'activityBase'  => esc_url_raw( rest_url( TBT_NOTES_REST_NAMESPACE . '/activity' ) ),
+					'activityNonce' => wp_create_nonce( 'wp_rest' ),
+				);
+			}
+
+			wp_localize_script( 'tbtmg-game', 'TBTMGGame', $activity );
+		}
 
 		/*
 		 * The tree mark's stylesheet is Hub's, under the handle 'tbt-tree'. It is
