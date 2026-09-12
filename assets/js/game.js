@@ -293,9 +293,20 @@
 			return card;
 		}
 
-		/* Called from the first card interaction of the sitting. Starts the clock
-		   and the heartbeat; both are no-ops on every later call. */
+		/* Called from the first card interaction of the sitting, and from every one
+		   after it. Starts the clock and the heartbeat; both are no-ops on every
+		   later call.
+
+		   A game that has already reported never beats again. After showResult() the
+		   board dismisses itself and sorts A–Z for review, so the finished board
+		   invites exactly the touches that would otherwise re-arm the heartbeat and
+		   leave the teacher's panel showing "Working" on finished work for the rest
+		   of the day. Shuffle & restart is not an exception: completionSent survives
+		   it by design, and a genuinely fresh sitting is a fresh page load. */
 		noteInteraction() {
+			if (this.completionSent) {
+				return;
+			}
 			if (!this.startedAt) {
 				this.startedAt = Date.now();
 			}

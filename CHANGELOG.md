@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.9.1 — 2026-09-12
+
+- A finished game stops beating for good. The result overlay dismisses itself
+  after five seconds and sorts the board A–Z for review, and every card touched
+  on that finished board used to re-arm the shared presence heartbeat — so the
+  student kept reading as **Working** in the teacher's panel for the rest of the
+  page's life, on a game she had already completed. A game that has reported now
+  ignores further interactions: **Shuffle & restart** is not an exception, and a
+  genuinely new sitting is a new page load.
+- On a page carrying several games, finishing one still stops the shared pulse
+  while another is in play; the game still being played re-arms it on its next
+  card touch, well inside the sixty-second presence window.
+
 ## 0.9.0 — 2026-09-12
 
 - Finishing a game now reports the completion to the teacher's Class Progress
